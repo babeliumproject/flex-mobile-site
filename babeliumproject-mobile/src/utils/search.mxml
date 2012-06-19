@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			xmlns:s="library://ns.adobe.com/flex/spark"
+			xmlns:utils="utils.*"
+			xmlns:View="View."
+			xmlns:assets="assets.ButtonSkin">
+	
+	<fx:Script>
+		<![CDATA[
+			import View.SearchedVideos;
+			import View.SelectedVideo;
+			
+			import events.SearchEvent;
+			
+			import model.DataModel;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.components.Button;
+			
+			protected function search_on_babelium(event:MouseEvent):void
+			{
+				DataModel.getInstance().searchField=searchField.text;
+				//if (DataModel.getInstance().currentContentViewStackIndex != ViewChangeEvent.VIEWSTACK_SEARCH_MODULE_INDEX)
+				//{
+				new SearchEvent(SearchEvent.LAUNCH_SEARCH).dispatch();
+				
+			}
+				
+			public function set onSearchRetrieved(value:Boolean):void
+			{
+				
+				if (DataModel.getInstance().videoSearchesRetrieved)
+				{
+					
+					navigator.pushView(View.SelectedVideo,null,null,null);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Binding source="{DataModel.getInstance().videoSearchesRetrieved}"
+				destination="this.onSearchRetrieved"/>
+	<fx:Declarations>
+		<s:SlideViewTransition id="slideTrans" duration="10"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:ActionBar id="search1" width="100%" height="50" alpha="0.5">
+		
+		
+	<s:titleContent>
+		<s:Group width="100%" >
+		<s:layout>
+			<s:HorizontalLayout/>
+		</s:layout>
+			<s:HGroup width="5%"/>
+		<s:HGroup width="100%" horizontalAlign="center">
+			<s:TextInput id="searchField"   height="40" width="60%" fontSize="17" textAlign="center"   prompt="type to search" enter="search_on_babelium(null)">
+				</s:TextInput>
+			<s:Button  skinClass="skins.ButtonSkin" width="41" height="41" label="go" click="search_on_babelium(event)">
+				
+				
+			</s:Button>
+			<s:HGroup  verticalAlign="middle" >
+				
+	
+				
+			</s:HGroup>
+		</s:HGroup>
+		</s:Group>
+	</s:titleContent>
+	</s:ActionBar>
+	
+</s:View>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:common="view.common.*"
+		 autoLayout="true">
+
+	<s:layout>
+		<s:VerticalLayout verticalAlign="middle" horizontalAlign="center"/>
+	</s:layout>
+
+	<s:Label text="{resourceManager.getString('myResources','MESSAGE_YOU_MUST_BE_REGISTERED')}"
+			 styleName="errorLabel"
+			 visible="{ !DataModel.getInstance().isLoggedIn}"/>
+	<s:VGroup id="evaluationOptions"
+			  visible="{ DataModel.getInstance().isLoggedIn}"
+			  width="100%">
+		<s:HGroup width="100%"
+				  visible="{!DataModel.getInstance().isLoggedIn}">
+			<s:Label text="{resourceManager.getString('myResources','LABEL_CLICK_HERE')}"/>
+			<mx:LinkButton label="{resourceManager.getString('myResources','BUTTON_HERE')}"/>
+			<s:Label text="{resourceManager.getString('myResources','MESSAGE_TO_SIGN_IN_TO_SIGN_UP')}"/>
+			<mx:LinkButton label="{resourceManager.getString('myResources','BUTTON_HERE')}"/>
+		</s:HGroup>
+		<s:Label text="{resourceManager.getString('myResources','MESSAGE_SUCCESSFULLY_SAVED')}"/>
+		<s:Label text="{resourceManager.getString('myResources','MESSAGE_ASK_USERS_EVALUATION')}"/>
+		<s:Label text="{resourceManager.getString('myResources','MESSAGE_ASK_EVALUATION_EXPLAIN_1')}"/>
+		<s:Label text="{resourceManager.getString('myResources','MESSAGE_ASK_EVALUATION_EXPLAIN_2')}"/>
+		<s:Label text="{resourceManager.getString('myResources','MESSAGE_ASK_EVALUATION_EXPLAIN_3')}"/>
+		<s:HGroup width="100%"
+				  visible="{DataModel.getInstance().isAutoevaluable}">
+			<s:Label text="{resourceManager.getString('myResources','MESSAGE_ASK_COMPUTER_EVALUATION')}"/>
+			<s:CheckBox label="{resourceManager.getString('myResources','CHECK_YES_PLEASE')}"
+						 id="autoevaluateCheckbox"/>
+		</s:HGroup>
+		<s:HGroup width="100%">
+			<s:Button label="{resourceManager.getString('myResources','BUTTON_SOMEONE_EVALUATE_ME')}"
+					  buttonMode="true"
+					  click="evaluationRequestedClickHandler()"/>
+			<s:Button label="{resourceManager.getString('myResources','BUTTON_NO_THANKS')}"
+					  buttonMode="true"
+					  click="returnToMainClickHandler()"/>
+		</s:HGroup>
+	</s:VGroup>
+
+	<fx:Script>
+		<![CDATA[
+			import events.EvaluationEvent;
+			import events.RecordingEndOptionEvent;
+			import events.ResponseEvent;
+			import events.ViewChangeEvent;
+
+			import model.DataModel;
+
+			import mx.controls.Alert;
+
+			import view.common.CustomAlert;
+
+			import vo.EvaluationVO;
+			import vo.ResponseVO;
+			import vo.UserVO;
+
+			private function evaluationRequestedClickHandler():void
+			{
+				//Check if the user is online
+				if (DataModel.getInstance().isLoggedIn)
+				{
+					//Get user's credit count and evaluation credit cost
+					var userInfo:UserVO=DataModel.getInstance().loggedUser;
+					var userCredCount:int=userInfo.creditCount;
+					var credsEvalRequest:int=DataModel.getInstance().prefDic['evaluationRequestCredits'];
+					if (userCredCount - credsEvalRequest >= 0)
+					{
+						var responseId:int=DataModel.getInstance().historicData.videoResponseId;
+						var response:ResponseVO=new ResponseVO(responseId, 0, "", false, "", "", 0, "", 0, "", 0, 0);
+						new ResponseEvent(ResponseEvent.MAKE_RESPONSE_PUBLIC, response).dispatch();
+					}
+					else
+					{
+						CustomAlert.error(resourceManager.getString('myResources', 'ERROR_INSUFICCIENT_CREDITS'));
+					}
+
+					if (DataModel.getInstance().isAutoevaluable && autoevaluateCheckbox.selected)
+					{
+						var aeResponseId:int=DataModel.getInstance().historicData.videoResponseId;
+						var requestData:EvaluationVO=new EvaluationVO();
+						requestData.responseId=aeResponseId;
+						requestData.transcriptionSystem="spinvox";
+						new EvaluationEvent(EvaluationEvent.ENABLE_TRANSCRIPTION_TO_RESPONSE, requestData).dispatch();
+					}
+
+					//new ViewChangeEvent(ViewChangeEvent.VIEW_EXERCISE_HOME).dispatch();
+					dispatchEvent(new RecordingEndOptionEvent(RecordingEndOptionEvent.CLOSE_REQUEST));
+				}
+				else
+				{
+					//Do nothing but hide the evaluation options panel and remember the user
+					//he/she must login in order to get the evaluations.
+					evaluationOptions.visible=false;
+					CustomAlert.info(resourceManager.getString('myResources', 'ERROR_SIGN_IN_TO_REQUEST'));
+					//new ViewChangeEvent(ViewChangeEvent.VIEW_EXERCISE_HOME).dispatch();
+					dispatchEvent(new RecordingEndOptionEvent(RecordingEndOptionEvent.CLOSE_REQUEST));
+				}
+			}
+
+			private function returnToMainClickHandler():void
+			{
+				//Finish and return to exercises main page
+				dispatchEvent(new RecordingEndOptionEvent(RecordingEndOptionEvent.CLOSE_REQUEST));
+			}
+
+			private function set checkAutoevaluationSupport(val:Boolean):void
+			{
+				var responseId:int=DataModel.getInstance().historicData.videoResponseId;
+				var requestData:EvaluationVO=new EvaluationVO();
+				requestData.responseId=responseId;
+				requestData.transcriptionSystem="spinvox";
+				new EvaluationEvent(EvaluationEvent.CHECK_AUTOEVALUATION_SUPPORT_RESPONSE, requestData).dispatch();
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Binding source="{DataModel.getInstance().historicData.videoResponseId}"
+				destination="this.checkAutoevaluationSupport"/>
+
+</s:Panel>

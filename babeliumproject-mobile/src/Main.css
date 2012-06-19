@@ -1,0 +1,69 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+
+
+global
+{
+	content-background-color: #fafbfc;
+	font-size: 19;
+	text-decoration: none;
+	chrome-color: #D1CCCC;
+}
+s|ActionBar {
+	chromeColor: #2485df;
+	backgroundAlpha:0.8;	
+}
+s|ActionBar#search1 {
+	chromeColor: #e2e2e2;
+	
+}
+.sectionTitleLabel{
+	fontWeight: bold;
+	fontSize: 20;
+	color: #268caa;
+}
+.sectionInfoBox{
+	backgroundImage: Embed('/assets/pattern.jpg');
+	backgroundImageFillMode: repeat;
+	backgroundAlpha: 0.25;
+	borderWeight: 0;
+	borderVisible: false;
+}
+
+.exerciseTitleLabel{
+	fontWeight: bold;
+	fontSize: 20;
+	color: #666666;
+}
+.boldYellowLabel{
+	fontWeight: bold;
+	fontSize: 18;
+	color: #d5ac32;
+}
+
+.commonLinkButton{
+	skinClass:ClassReference("skins.IconLinkSkin");
+	fontWeight:bold;
+	fontSize: 15;
+	colorOver:#2d89a4;
+	colorDown:#2d89a4;
+	color:#666666;
+	underlineOver:true;
+	underlineDown:false;
+}
+.videoDurationLabel{
+	borderVisible: true;
+	fontSize: 10;
+	contentBackgroundColor: #000000;
+	contentBackgroundAlpha: 1.0;
+	color: #FFFFFF;
+	inactiveTextSelectionColor: #FFFFFF;
+}
+.MyuIStyle{
+	backgroundColor:#FFFFFF;
+
+}
+.recStartLinkButton{
+	skinClass:ClassReference("skins.IconLinkSkin");
+	icon:Embed('/resources/images/button_rec.png');
+}

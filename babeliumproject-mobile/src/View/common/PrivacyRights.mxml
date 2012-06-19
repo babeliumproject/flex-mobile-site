@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+<skins:CustomTitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+						 xmlns:s="library://ns.adobe.com/flex/spark"
+						 xmlns:mx="library://ns.adobe.com/flex/mx"
+						 xmlns:skins="skins.*"
+						 width="360"
+						 height="220"
+						 styleName="privacyRightsPopup"
+						 creationComplete="creationCompleteHandler()"
+						 title="{resourceManager.getString('myResources','TITLE_PRIVACY_SETTINGS')}">
+	
+	<skins:layout>
+		<s:VerticalLayout paddingLeft="10"
+						  paddingRight="10"
+						  paddingTop="10"
+						  paddingBottom="10"/>
+	</skins:layout>
+	
+	<fx:Script>
+
+		<![CDATA[
+			import model.DataModel;
+			
+			//import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			
+			private var _microphoneChanged:Boolean=false;
+			private var _microphoneSoundTestPassed:Boolean=false;
+			
+			private var _cameraChanged:Boolean=false;
+			
+			private var _devicesAllowed:Boolean=false;
+			
+			public static var microphoneFound:Boolean=false;
+			public static var cameraFound:Boolean=false;
+			
+			public static var useMicAndCamera:Boolean=false;
+			
+			
+			public static function cameraReady():Boolean
+			{
+				return (DataModel.getInstance().microphone && !DataModel.getInstance().microphone.muted);
+			}
+			
+			public static function microphoneReady():Boolean
+			{
+				return (DataModel.getInstance().camera && !DataModel.getInstance().camera.muted);
+			}
+			
+			private function creationCompleteHandler():void
+			{
+				initDevices();
+			}
+			
+			private function initDevices():void
+			{
+				if (devicesAdministrativelyProhibited())
+				{
+					micCamViewStack.selectedChild=adminErrorNavContent;
+					trace("Error: User has no rigths to access devices.");
+				}
+				else
+				{
+					if (microphoneAvailable())
+					{
+						microphoneFound=true;
+						var microphone:Microphone=Microphone.getMicrophone();
+						if (!DataModel.getInstance().microphone)
+						{
+							_microphoneChanged=true;
+							DataModel.getInstance().microphone=microphone;
+						}
+						else if (DataModel.getInstance().microphone != microphone)
+						{
+							_microphoneChanged=true;
+							DataModel.getInstance().microphone=microphone;
+							trace("Mic device changed.");
+						}
+						if (DataModel.getInstance().microphone.muted)
+						{
+							micCamViewStack.selectedChild=privacyNoticeNavContent;
+							_devicesAllowed=false;
+							DataModel.getInstance().microphone.addEventListener(StatusEvent.STATUS, microphonePrivacyStatus);
+						}
+						else
+						{
+							_devicesAllowed=true;
+						}
+						
+						if (useMicAndCamera)
+						{
+							if (cameraAvailable())
+							{
+								cameraFound=true;
+								var camera:Camera=Camera.getCamera();
+								if (!DataModel.getInstance().camera)
+								{
+									_cameraChanged=true;
+									DataModel.getInstance().camera=camera;
+								}
+								else if (DataModel.getInstance().camera != camera)
+								{
+									_cameraChanged=true;
+									DataModel.getInstance().camera=camera;
+									
+									trace("Camera device changed.");
+								}
+								if (DataModel.getInstance().camera.muted)
+								{
+									micCamViewStack.selectedChild=privacyNoticeNavContent;
+									_devicesAllowed=false;
+									DataModel.getInstance().camera.addEventListener(StatusEvent.STATUS, cameraPrivacyStatus);
+								}
+								else
+								{
+									_devicesAllowed=true;
+								}
+							}
+							else
+							{
+								cameraFound=false;
+								micCamViewStack.selectedChild=cameraNotFoundErrorNavContent;
+								trace("Error: No camera was detected.");
+							}
+						}
+					}
+					else
+					{
+						microphoneFound=false;
+						micCamViewStack.selectedChild=micNotFoundErrorNavContent;
+						trace("Error: No mic was detected.");
+					}
+				}
+				if (_devicesAllowed)
+				{
+					DataModel.getInstance().micCamAllowed=_devicesAllowed;
+					if (useMicAndCamera)
+					{
+						if (microphoneFound && cameraFound)
+							cancelButtonClickHandler(null);
+					}
+					else
+					{
+						if (microphoneFound)
+							cancelButtonClickHandler(null);
+					}
+				}
+			}
+			
+			private function devicesAdministrativelyProhibited():Boolean
+			{
+				return (Capabilities.avHardwareDisable);
+			}
+			
+			private function showPrivacySettings():void
+			{
+				Security.showSettings(SecurityPanel.PRIVACY);
+			}
+			
+			public function cameraAvailable():Boolean
+			{
+				return (Camera.names.length > 0);
+			}
+			
+			// Will always return true since Flash identifies the system's dummy audio input as a microphone
+			public function microphoneAvailable():Boolean
+			{
+				return (Microphone.names.length > 0);
+			}
+			
+			private function microphonePrivacyStatus(event:StatusEvent):void
+			{
+				if (event.code == "Microphone.Muted")
+				{
+					_devicesAllowed=false;
+					privacyRecButton.label="BUTTON_OK";
+				}
+				if (event.code == "Microphone.Unmuted")
+				{
+					_devicesAllowed=true;
+					privacyRecButton.label="BUTTON_RECORD";
+				}
+			}
+			
+			private function cameraPrivacyStatus(event:StatusEvent):void
+			{
+				if (event.code == "Camera.Muted")
+				{
+					_devicesAllowed=false;
+					privacyRecButton.label="BUTTON_OK";
+				}
+				if (event.code == "Camera.Unmuted")
+				{
+					_devicesAllowed=true;
+					privacyRecButton.label="BUTTON_RECORD";
+				}
+			}
+			
+			private function cancelButtonClickHandler(event:Event):void
+			{
+				//PopUpManager.removePopUp(this);
+				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+			}
+			
+			private function okButtonClickHandler(event:Event):void
+			{
+				if (!_devicesAllowed)
+					showPrivacySettings();
+				else
+				{
+					DataModel.getInstance().micCamAllowed=_devicesAllowed;
+					cancelButtonClickHandler(null);
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<mx:ViewStack id="micCamViewStack"
+				  width="100%"
+				  height="100%">
+		
+		<s:NavigatorContent id="micNotFoundErrorNavContent">
+			<s:VGroup id="micNotFoundError"
+					  width="100%">
+				<s:HGroup>
+					<mx:Text width="100%"
+							 text="{resourceManager.getString('myResources','TEXT_MIC_NOT_FOUND')}"/>
+					<mx:Image source="resources/images/microphone_error.png"/>
+				</s:HGroup>
+				<s:HGroup>
+					<s:Button id="micNotFoundErrorRetryButton"
+							  label="{resourceManager.getString('myResources','BUTTON_RETRY')}"
+							  click="initDevices()"
+							  buttonMode="true"/>
+					
+					<s:Button id="micNotFoundErrorCancelButton"
+							  label="{resourceManager.getString('myResources','BUTTON_CANCEL')}"
+							  click="cancelButtonClickHandler(event)"
+							  buttonMode="true"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:NavigatorContent>
+		
+		<s:NavigatorContent id="cameraNotFoundErrorNavContent">
+			<s:VGroup id="cameraNotFoundError"
+					  width="100%">
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<mx:Text width="100%"
+							 text="{resourceManager.getString('myResources','TEXT_CAMERA_NOT_FOUND')}"/>
+					<mx:Image source="resources/images/webcam_error.png"/>
+				</s:HGroup>
+				<s:HGroup>
+					<s:Button id="camNotFoundErrorRetryButton"
+							  label="{resourceManager.getString('myResources','BUTTON_RETRY')}"
+							  click="initDevices()"
+							  buttonMode="true"/>
+					<s:Button id="camNotFoundErrorCancelButton"
+							  label="{resourceManager.getString('myResources','BUTTON_CANCEL')}"
+							  click="cancelButtonClickHandler(event)"
+							  buttonMode="true"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:NavigatorContent>
+		
+		<s:NavigatorContent id="adminErrorNavContent">
+			<s:VGroup id="adminError"
+					  width="100%">
+				<mx:Text width="100%"
+						 text="{resourceManager.getString('myResources','TEXT_ADMINISTRATIVELY_DISABLED')}"/>
+				<s:Button id="adminErrorButton"
+						  label="{resourceManager.getString('myResources','BUTTON_OK')}"
+						  click="cancelButtonClickHandler(event)"
+						  buttonMode="true"/>
+			</s:VGroup>
+		</s:NavigatorContent>
+		
+		<s:NavigatorContent id="privacyNoticeNavContent">
+			<s:VGroup id="privacyNotice"
+					  width="100%">
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<mx:Text width="100%"
+							 text="{resourceManager.getString('myResources','TEXT_PRIVACY_RIGHTS_EXPLAIN')}"/>
+					<mx:Image source="resources/images/privacy_settings.png"
+							  width="160"
+							  height="102"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  height="100%"
+						  horizontalAlign="left"
+						  verticalAlign="bottom"
+						  paddingTop="8">
+					<s:Button id="privacyRecButton"
+							  label="{resourceManager.getString('myResources','BUTTON_OK')}"
+							  click="okButtonClickHandler(event)"
+							  styleName="bigBlueButton"
+							  buttonMode="true"/>
+					<s:Button id="privacyCancelButton"
+							  label="{resourceManager.getString('myResources','BUTTON_CANCEL')}"
+							  click="cancelButtonClickHandler(event)"
+							  styleName="bigBlueButton"
+							  buttonMode="true"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:NavigatorContent>
+		
+		<s:NavigatorContent id="micSoundTestNavContent">
+			<s:VGroup id="micSoundTest"
+					  width="100%">
+				<mx:Text text="{resourceManager.getString('myResources','TEXT_MIC_TEST_EXPLAIN')}"/>
+			</s:VGroup>
+		</s:NavigatorContent>
+		
+	</mx:ViewStack>
+	
+	
+</skins:CustomTitleWindow>
+
+

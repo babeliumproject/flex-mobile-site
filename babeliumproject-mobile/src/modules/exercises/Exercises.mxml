@@ -1,0 +1,935 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:exercises="modules.exercises.*"
+		  xmlns:common="view.common.*"
+		  xmlns:videoPlayer="modules.videoPlayer.*"
+		  xmlns:videoPlayerControls="modules.videoPlayer.controls.babelia.*"
+		  verticalAlign="top"
+		  horizontalAlign="center"
+		  width="100%"
+		  creationComplete="onComplete()"
+		  xmlns:skins="skins.*">
+
+	<fx:Script>
+		<![CDATA[
+			import commands.cuepointManager.RecordingOtherRoleCommand;
+			import commands.cuepointManager.ReplayResponseCommand;
+			import commands.cuepointManager.ShowHideSubtitleCommand;
+			import commands.cuepointManager.StartRecordingSelectedRoleCommand;
+			import commands.cuepointManager.StopRecordingSelectedRoleCommand;
+			
+			import control.BabeliaBrowserManager;
+			import control.CuePointManager;
+			
+			import events.CueManagerEvent;
+			import events.ExerciseEvent;
+			import events.ExerciseRoleEvent;
+			import events.RecordingEndOptionEvent;
+			import events.ResponseEvent;
+			import events.UserVideoHistoryEvent;
+			import events.ViewChangeEvent;
+			
+			import model.DataModel;
+			
+			import modules.videoPlayer.events.VideoPlayerEvent;
+			import modules.videoPlayer.events.babelia.RecordingEvent;
+			import modules.videoPlayer.events.babelia.StreamEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.managers.BrowserManager;
+			import mx.managers.PopUpManager;
+			import mx.utils.ObjectUtil;
+			
+			import view.common.*;
+			
+			import vo.CreditHistoryVO;
+			import vo.CueObject;
+			import vo.ExerciseRoleVO;
+			import vo.ExerciseVO;
+			import vo.ResponseVO;
+			import vo.UserVideoHistoryVO;
+
+			/**
+			 * CONSTANTS
+			 **/
+			private const SELECT_EXERCISE:String="SELECT_EXERCISE";
+
+			private var _creationComplete:Boolean = false;
+			
+			
+			/**
+			 * Exercise Related variables
+			 **/
+			[Bindable]
+			private var _currentExercise:ExerciseVO;
+			[Bindable]
+			private var _thumbURL:String=DataModel.getInstance().thumbURL + "/";
+			[Bindable]
+			private var _exerciseTitle:String;
+			[Bindable]
+			private var _exerciseSelected:Boolean=false;
+			[Bindable]
+			private var _locales:Array;
+			[Bindable]
+			private var _characterNames:ArrayCollection=new ArrayCollection();
+			private var _roles:ArrayCollection;
+			private var _exerciseName:String;
+			private var _exerciseId:int;
+
+			private var _exerciseStartedPlaying:Boolean=false;
+
+			/**
+			 * Recording related variables
+			 **/
+			[Bindable]
+			private var _rolesReady:Boolean;
+			[Bindable]
+			private var _localesReady:Boolean;
+			[Bindable]
+			private var _cueManagerReady:Boolean;
+
+			private var _selectedRole:String;
+			private var _recordedFilename:String;
+
+			/**
+			 * Options menus
+			 **/
+			private var _evaluationRequest:EvaluationRequest;
+
+			/**
+			 * Video player related vaiables
+			 **/
+			private var _cueManager:CuePointManager=CuePointManager.getInstance();
+			[Bindable]
+			private var _streamSource:String=DataModel.getInstance().streamingResourcesPath;
+			private const EXERCISE_FOLDER:String=DataModel.getInstance().exerciseStreamsFolder;
+			private const RESPONSE_FOLDER:String=DataModel.getInstance().responseStreamsFolder;
+
+			public var _videoPlayerReady:Boolean=false;
+
+			[Embed('/resources/images/button_abort.png')]
+			[Bindable]
+			private var abortIcon:Class;
+
+			[Embed('/resources/images/button_rec.png')]
+			[Bindable]
+			private var recIcon:Class;
+
+			/**
+			 * On creation complete
+			 **/
+			private function onComplete():void
+			{
+				setupVideoPlayer();
+				setupResponseOptions();
+				if(_exerciseTitle == null)
+					_exerciseTitle=resourceManager.getString('myResources', 'LABEL_EXERCISE_TITLE');
+				_creationComplete = true;
+			}
+
+			/**
+			 * Setup for videoplayer
+			 **/
+			private function setupVideoPlayer():void
+			{
+				VP.addEventListener(VideoPlayerEvent.CONNECTED, onVideoPlayerReady);
+				VP.addEventListener(VideoPlayerEvent.VIDEO_STARTED_PLAYING, onVideoStartedPlaying);
+				VP.addEventListener(RecordingEvent.END, onRecordingEnd);
+				VP.addEventListener(RecordingEvent.ABORTED, onRecordingAborted);
+				VP.addEventListener(RecordingEvent.CAM_DENIED, onCamAccessDenied);
+				VP.addEventListener(RecordingEvent.MIC_DENIED, onMicAccessDenied);
+			}
+
+			private function setupResponseOptions():void
+			{
+				recordingEndOptions.addEventListener(RecordingEndOptionEvent.VIEW_BOTH, onWatchExerciseAndResponse);
+				recordingEndOptions.addEventListener(RecordingEndOptionEvent.RECORD_AGAIN, onRecordAgain);
+				recordingEndOptions.addEventListener(RecordingEndOptionEvent.DISCARD_RESPONSE, onAbortRecording);
+				recordingEndOptions.addEventListener(RecordingEndOptionEvent.SAVE_RESPONSE, onSaveResponse);
+			}
+
+			private function onVideoPlayerReady(e:VideoPlayerEvent):void
+			{
+				_videoPlayerReady=true;
+				VP.stopVideo();
+			}
+
+			/**
+			 * Preparing exercise
+			 **/
+			private function prepareExercise():void
+			{
+				// Prepare new video in VideoPlayer
+				VP.stopVideo();
+				VP.state=VideoPlayerBabelia.PLAY_STATE;
+				VP.videoSource=EXERCISE_FOLDER + '/' + _exerciseName;
+
+				// Retrieving roles for selected exercise
+				var auxExRol:ExerciseRoleVO=new ExerciseRoleVO();
+				auxExRol.exerciseId=_exerciseId;
+				new ExerciseRoleEvent(ExerciseRoleEvent.GET_EXERCISE_ROLES, auxExRol).dispatch();
+
+				// Retrieving available locales for selected exercise's subtitles
+				var auxEx:ExerciseVO=new ExerciseVO();
+				auxEx.id=_exerciseId;
+				new ExerciseEvent(ExerciseEvent.GET_EXERCISE_LOCALES, auxEx).dispatch();
+			}
+
+			/**
+			 * On locales retrieved
+			 **/
+			private function set onLocalesRetrieved(value:Boolean):void
+			{
+				if (value)
+				{
+					_locales=DataModel.getInstance().availableExerciseLocales;
+
+					if (_locales == null)
+					{
+						availableLocales.enabled=false;
+						_localesReady=false;
+					}
+					else
+					{
+						availableLocales.enabled=true;
+						_localesReady=true;
+
+						// Preparing subtitles
+						prepareCueManager();
+					}
+
+					DataModel.getInstance().availableExerciseLocalesRetrieved=false;
+				}
+			}
+
+			/**
+			 * On roles retrieved
+			 **/
+			private function set onRolesRetrieved(value:Boolean):void
+			{
+				if (value)
+				{
+					_roles=DataModel.getInstance().availableExerciseRoles.getItemAt(DataModel.RECORDING_MODULE) as ArrayCollection;
+					_characterNames.removeAll();
+
+					if (_roles == null)
+					{
+						availableRoles.enabled=false;
+						_rolesReady=false;
+					}
+					else
+					{
+						availableRoles.enabled=true;
+						_rolesReady=true;
+
+						for each (var role:ExerciseRoleVO in _roles)
+						{
+							if (role.characterName != "NPC")
+								_characterNames.addItem(role.characterName);
+						}
+					}
+
+					DataModel.getInstance().availableExerciseRolesRetrieved.setItemAt(false, DataModel.RECORDING_MODULE);
+				}
+			}
+
+			/**
+			 * Reset Cuepoint Manager
+			 **/
+			private function resetCueManager():void
+			{
+				_cueManager.reset();
+				VP.removeEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints);
+				_cueManager.removeEventListener(CueManagerEvent.SUBTITLES_RETRIEVED, onSubtitlesRetrieved);
+
+			}
+
+			/**
+			 * Prepare Cuepoint Manager
+			 **/
+			private function prepareCueManager():void
+			{
+				var cached:Boolean=_cueManager.setVideo(_exerciseId);
+
+				_cueManager.addEventListener(CueManagerEvent.SUBTITLES_RETRIEVED, onSubtitlesRetrieved);
+				_cueManager.setCuesFromSubtitleUsingLocale(availableLocales.selectedItem.code);
+
+				VP.removeEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints);
+				VP.addEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints);
+			}
+
+			/**
+			 * On subtitles retrieved
+			 **/
+			private function onSubtitlesRetrieved(e:CueManagerEvent):void
+			{
+				setupPlayCommands();
+			}
+
+			/**
+			 * Setup commands for playing sample video
+			 **/
+			private function setupPlayCommands():void
+			{
+				var auxList:ArrayCollection=_cueManager.getCuelist();
+
+				if (auxList.length <= 0)
+					return;
+
+				for each (var cueobj:CueObject in auxList)
+				{
+					cueobj.setStartCommand(new ShowHideSubtitleCommand(cueobj, VP));
+					cueobj.setEndCommand(new ShowHideSubtitleCommand(null, VP));
+				}
+
+				_cueManagerReady=true;
+				onVideoStartedPlaying(null);
+			}
+
+			/**
+			 * Setup commands for playing the recorded response
+			 **/
+			private function setupReplayCommands():void
+			{
+				var auxList:ArrayCollection=_cueManager.getCuelist();
+
+				if (auxList.length <= 0)
+					return;
+
+				for each (var cueobj:CueObject in auxList)
+				{
+					cueobj.setStartCommand(new ReplayResponseCommand(cueobj, VP));
+					cueobj.setEndCommand(new ReplayResponseCommand(null, VP));
+				}
+
+				_cueManagerReady=true;
+			}
+
+			/**
+			 * Setup recording commands
+			 **/
+			private function setupRecordingCommands():void
+			{
+				var auxList:ArrayCollection=_cueManager.getCuelist();
+
+				if (auxList.length <= 0)
+					return;
+
+				for each (var cueobj:CueObject in auxList)
+				{
+					if (cueobj.role != _selectedRole)
+					{
+						cueobj.setStartCommand(new RecordingOtherRoleCommand(cueobj, VP));
+
+						cueobj.setEndCommand(new ShowHideSubtitleCommand(null, VP));
+					}
+					else
+					{
+						cueobj.setStartCommand(new StartRecordingSelectedRoleCommand(cueobj, VP));
+
+						cueobj.setEndCommand(new StopRecordingSelectedRoleCommand(VP));
+					}
+				}
+
+				_cueManagerReady=true;
+			}
+
+			/**
+			 * On locale combo box changed
+			 **/
+			private function onLocaleComboChanged(e:Event):void
+			{
+				resetCueManager();
+				prepareCueManager();
+			}
+
+			/**
+			 * Show/Hide selected exercise
+			 **/
+			private function showSelectedExercise():void
+			{
+				videoPlayerAndRecordingControls.includeInLayout=true;
+				videoPlayerAndRecordingControls.visible=true;
+
+				// Update URL
+				BabeliaBrowserManager.getInstance().updateURL(BabeliaBrowserManager.index2fragment(ViewChangeEvent.VIEWSTACK_EXERCISE_MODULE_INDEX), BabeliaBrowserManager.VIEW, _exerciseName);
+
+				_exerciseSelected=true;
+			}
+
+			private function hideSelectedExercise():void
+			{
+				videoPlayerAndRecordingControls.includeInLayout=false;
+				videoPlayerAndRecordingControls.visible=false;
+
+				_exerciseSelected=false;
+			}
+
+			/**
+			 * On select an exercise from list
+			 **/
+			private function set onExerciseSelected(value:Boolean):void
+			{
+
+				if (value == true)
+				{
+					// Retrieving selected exercise information
+					var tmp:ExerciseVO=DataModel.getInstance().currentExercise.getItemAt(DataModel.RECORDING_MODULE) as ExerciseVO;
+					_exerciseName=tmp.name;
+					_exerciseTitle=tmp.title;
+					_exerciseId=tmp.id;
+					_currentExercise=tmp;
+
+					DataModel.getInstance().currentExerciseRetrieved.setItemAt(false, DataModel.RECORDING_MODULE);
+
+					// Need to retrieve again exercise's information
+					_rolesReady=false;
+					_localesReady=false;
+					_cueManagerReady=false;
+
+					if (DataModel.getInstance().isLoggedIn)
+					{
+						ratingShareReport.exerciseData=tmp;
+					}
+					showSelectedExercise();
+					prepareExercise();
+					resetCueManager();
+				}
+			}
+
+			/**
+			 * On start recording clicked
+			 **/
+			private function onStartRecordingClicked(e:MouseEvent):void
+			{
+				panelSelectedExercise.includeInLayout=false;
+				panelSelectedExercise.visible=false;
+				recordingEndOptions.includeInLayout=true;
+				recordingEndOptions.visible=true;
+
+				// Commands with selected role
+				_selectedRole=availableRoles.selectedItem.toString();
+				setupRecordingCommands();
+
+				// Recording mode
+				if (micOnly.selected)
+					VP.state=VideoPlayerBabelia.RECORD_MIC_STATE;
+				else
+					VP.state=VideoPlayerBabelia.RECORD_BOTH_STATE;
+
+				// Prepare arrows
+				showArrows();
+
+				// Disable events and tabs
+				DataModel.getInstance().recordingExercise=true;
+
+				//Save statistical data
+				statisticRecAttempt();
+			}
+
+			private function statisticRecAttempt():void
+			{
+				var subtitlesAreUsed:Boolean=VP.subtitlePanelVisible;
+				var subtitleId:int=_cueManager.currentSubtitle;
+				var roleId:int=0;
+				for each (var role:ExerciseRoleVO in _roles)
+				{
+					if (role.characterName == _selectedRole)
+					{
+						roleId=role.id;
+						break;
+					}
+				}
+				var videoData:UserVideoHistoryVO=new UserVideoHistoryVO(0, 0, _exerciseId, true, 0, '', subtitlesAreUsed, subtitleId, roleId);
+				new UserVideoHistoryEvent(UserVideoHistoryEvent.STAT_ATTEMPT_RESPONSE, videoData).dispatch();
+			}
+
+			/**
+			 * On recording end successfully
+			 **/
+			private function onRecordingEnd(e:RecordingEvent):void
+			{
+				// Store last recorded response's filename
+				_recordedFilename=e.fileName;
+
+				DataModel.getInstance().recordingExercise=false;
+
+				// Set the videoplayer to playback both the exercise and the last response.
+				VP.videoSource=EXERCISE_FOLDER + '/' + _exerciseName;
+				VP.state=VideoPlayerBabelia.PLAY_BOTH_STATE;
+				VP.secondSource=RESPONSE_FOLDER + '/' + _recordedFilename
+
+				VP.seek=false;
+				VP.stopVideo();
+			}
+
+			/**
+			 * On recording aborted
+			 **/
+			private function onRecordingAborted(e:RecordingEvent):void
+			{
+				CustomAlert.error(resourceManager.getString('myResources', 'DEVICES_NOT_WORKING'));
+				recordingError();
+			}
+
+			/**
+			 * On cam access denied
+			 **/
+			private function onCamAccessDenied(e:RecordingEvent):void
+			{
+				CustomAlert.error(resourceManager.getString('myResources', 'DEVICES_NOT_WORKING'));
+				recordingError();
+			}
+
+			/**
+			 * On mic access denied
+			 **/
+			private function onMicAccessDenied(e:RecordingEvent):void
+			{
+				CustomAlert.error(resourceManager.getString('myResources', 'DEVICES_NOT_WORKING'));
+				recordingError();
+			}
+
+			private function recordingError():void
+			{
+				DataModel.getInstance().recordingExercise=false;
+				hideArrows();
+				VP.unattachUserDevices();
+				VP.state=VideoPlayerBabelia.PLAY_STATE;
+				VP.removeEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints);
+
+				recordingEndOptions.includeInLayout=false;
+				recordingEndOptions.visible=false;
+				panelSelectedExercise.visible=true;
+				panelSelectedExercise.includeInLayout=true;
+
+			}
+
+			/**
+			 * Show Arrows
+			 **/
+			private function showArrows():void
+			{
+				VP.arrows=true;
+				VP.setArrows(_cueManager.cues2rolearray(), _selectedRole);
+			}
+
+			/**
+			 * Hide Arroes
+			 **/
+			private function hideArrows():void
+			{
+				VP.arrows=false;
+				VP.removeArrows();
+			}
+
+			/**
+			 * On tab change - reset selected video and stop streaming
+			 **/
+			private function set onTabChange(value:Boolean):void
+			{
+				if(_creationComplete && DataModel.getInstance().oldContentViewStackIndex == ViewChangeEvent.VIEWSTACK_EXERCISE_MODULE_INDEX)
+					resetComponent();
+			}
+
+			private function resetComponent():void
+			{
+				VP.endVideo(); // Stop video
+				VP.setSubtitle(""); // Clear subtitles if any
+				VP.videoSource=""; // Reset video source
+				VP.state=VideoPlayerBabelia.PLAY_STATE; //Reset the player window to display only the exercise
+
+				VP.arrows=false; // Hide arrows
+
+				_exerciseTitle=resourceManager.getString('myResources', 'LABEL_EXERCISE_TITLE');
+				_currentExercise=null; // Reset current exercise
+
+				hideSelectedExercise(); // Information of selected exercise
+				
+				exerciseList.exerciseListDataGroup.selectedIndex = -1;
+
+				// Remove cueManager's Listeners
+				_cueManager.removeEventListener(CueManagerEvent.SUBTITLES_RETRIEVED, onSubtitlesRetrieved);
+
+				//Remove the current exercise's info
+				ratingShareReport.exerciseData=null;
+			}
+
+			// Watch both
+			private function onWatchExerciseAndResponse(e:Event):void
+			{
+				showArrows();
+				setupRecordingCommands();
+
+				VP.videoSource=EXERCISE_FOLDER + '/' + _exerciseName;
+				VP.state=VideoPlayerBabelia.PLAY_BOTH_STATE;
+				VP.secondSource=RESPONSE_FOLDER + '/' + _recordedFilename
+
+				VP.seek=false;
+			}
+
+			// Watch response
+			private function onWatchResponse(e:Event):void
+			{
+				showArrows();
+				setupReplayCommands();
+
+				VP.videoSource=RESPONSE_FOLDER + '/' + _recordedFilename;
+				VP.state=VideoPlayerBabelia.PLAY_STATE;
+
+				VP.seek=false;
+			}
+
+			// Record again
+			private function onRecordAgain(e:Event):void
+			{
+				VP.videoSource=EXERCISE_FOLDER + '/' + _exerciseName;
+				setupRecordingCommands();
+				showArrows();
+				DataModel.getInstance().recordingExercise=true;
+
+				// Recording mode
+				if (micOnly.selected)
+					VP.state=VideoPlayerBabelia.RECORD_MIC_STATE;
+				else
+					VP.state=VideoPlayerBabelia.RECORD_BOTH_STATE;
+
+				//Save this new record attempt
+				statisticRecAttempt();
+			}
+
+			private function onAbortRecording(e:Event):void
+			{
+				recordingError();
+				prepareExercise();
+				resetCueManager();
+			}
+
+			// Save response
+			private function onSaveResponse(e:Event):void
+			{
+
+				var userCredCount:int=DataModel.getInstance().loggedUser.creditCount;
+				var credsEvalRequest:int=DataModel.getInstance().prefDic['evaluationRequestCredits'];
+				if (userCredCount - credsEvalRequest >= 0)
+				{
+					//This must be changed by some function that takes a snapshot of the Response video
+					var responseThumbnail:String="nothumb.png";
+					var subtitleId:int=_cueManager.currentSubtitle;
+					var responseData:ResponseVO=new ResponseVO(0, _exerciseId, _recordedFilename, true, responseThumbnail, "Red5", VP.duration, (new Date().toString()), 0, _selectedRole, 0, subtitleId);
+
+					//Third, save response				
+					new ResponseEvent(ResponseEvent.SAVE_RESPONSE, responseData).dispatch();
+
+					recordingEndOptions.includeInLayout=false;
+					recordingEndOptions.visible=false;
+					panelSelectedExercise.includeInLayout=true;
+					panelSelectedExercise.visible=true;
+
+
+					resetComponent();
+				}
+				else
+				{
+					CustomAlert.error(resourceManager.getString('myResources', 'ERROR_INSUFICCIENT_CREDITS'));
+				}
+			}
+
+			private function set statisticRecSave(value:Boolean):void
+			{
+				if (DataModel.getInstance().savedResponseId)
+				{
+					var subtitlesAreUsed:Boolean=VP.subtitlePanelVisible;
+					var subtitleId:int=_cueManager.currentSubtitle;
+					var roleId:int=0;
+					var responseId:int=DataModel.getInstance().savedResponseId;
+					for each (var role:ExerciseRoleVO in _roles)
+					{
+						if (role.characterName == _selectedRole)
+						{
+							roleId=role.id;
+							break;
+						}
+					}
+					var videoData:UserVideoHistoryVO=new UserVideoHistoryVO(0, 0, _exerciseId, false, responseId, '', subtitlesAreUsed, subtitleId, roleId);
+					new UserVideoHistoryEvent(UserVideoHistoryEvent.STAT_SAVE_RESPONSE, videoData).dispatch();
+				}
+			}
+
+			private function onVideoStartedPlaying(e:VideoPlayerEvent):void
+			{
+				_exerciseStartedPlaying=true;
+				if (DataModel.getInstance().isLoggedIn && _cueManagerReady && _rolesReady && _localesReady && _exerciseStartedPlaying)
+				{
+					_exerciseStartedPlaying=false;
+					var subtitlesAreUsed:Boolean=VP.subtitlePanelVisible;
+					var subtitleId:int=_cueManager.currentSubtitle;
+					var videoData:UserVideoHistoryVO=new UserVideoHistoryVO(0, 0, _exerciseId, false, 0, '', subtitlesAreUsed, subtitleId, 0);
+					if (_exerciseId > 0 && subtitleId > 0)
+						new UserVideoHistoryEvent(UserVideoHistoryEvent.STAT_EXERCISE_WATCH, videoData).dispatch();
+				}
+			}
+
+			// On URL change
+			public function set onURLChange(value:Object):void
+			{
+				var browser:BabeliaBrowserManager=BabeliaBrowserManager.getInstance();
+
+				if (browser.moduleIndex != ViewChangeEvent.VIEWSTACK_EXERCISE_MODULE_INDEX)
+					return;
+
+				if (value == null)
+					return;
+
+				if (browser.actionFragment == BabeliaBrowserManager.VIEW)
+				{
+					if (browser.targetFragment != '')
+					{
+
+						var tempEx:ExerciseVO=null;
+						var exercises:ArrayCollection=DataModel.getInstance().availableRecordableExercises;
+
+						for (var i:int=0; i < exercises.length; i++)
+						{
+							var tmp:ExerciseVO=exercises.getItemAt(i) as ExerciseVO;
+							if (tmp.name == browser.targetFragment)
+							{
+								tempEx=tmp;
+								break;
+							}
+						}
+
+						if (tempEx == null)
+						{
+							new ViewChangeEvent(ViewChangeEvent.VIEW_HOME_MODULE).dispatch();
+							return;
+						}
+						new ExerciseEvent(ExerciseEvent.EXERCISE_SELECTED, tempEx).dispatch();
+						FlexGlobals.topLevelApplication.appContainer.verticalScrollPosition=0;
+					}
+					else
+					{
+						new ViewChangeEvent(ViewChangeEvent.VIEW_HOME_MODULE).dispatch();
+						return;
+					}
+				}
+			}
+
+			public function set onLogout(value:Boolean):void
+			{
+				if (DataModel.getInstance().isLoggedIn == false)
+				{
+					guestEditWarningBox.includeInLayout=true;
+					guestEditWarningBox.visible=true;
+					panelSelectedExercise.includeInLayout=false;
+					panelSelectedExercise.visible=false;
+					recordingEndOptions.visible=false;
+					recordingEndOptions.includeInLayout=false;
+				}
+				else
+				{
+					guestEditWarningBox.includeInLayout=false;
+					guestEditWarningBox.visible=false;
+					panelSelectedExercise.includeInLayout=true;
+					panelSelectedExercise.visible=true;
+					recordingEndOptions.visible=false;
+					recordingEndOptions.includeInLayout=false;
+				}
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Binding source="{DataModel.getInstance().currentExerciseRetrieved.getItemAt(DataModel.RECORDING_MODULE)}"
+				destination="this.onExerciseSelected"/>
+	<fx:Binding source="{DataModel.getInstance().stopVideoFlag}"
+				destination="this.onTabChange"/>
+	<fx:Binding source="{DataModel.getInstance().availableExerciseLocalesRetrieved}"
+				destination="this.onLocalesRetrieved"/>
+	<fx:Binding source="{DataModel.getInstance().availableExerciseRolesRetrieved.getItemAt(DataModel.RECORDING_MODULE)}"
+				destination="this.onRolesRetrieved"/>
+	<fx:Binding source="{DataModel.getInstance().savedResponseRetrieved}"
+				destination="statisticRecSave"/>
+	<fx:Binding source="{BabeliaBrowserManager.getInstance().targetFragment}"
+				destination="onURLChange"/>
+	<fx:Binding source="{DataModel.getInstance().isLoggedIn}"
+				destination="onLogout"/>
+
+	<s:BorderContainer styleName="sectionInfoBox"
+					   width="100%"
+					   minHeight="0">
+		<s:layout>
+			<s:VerticalLayout paddingTop="16"/>
+		</s:layout>
+		<s:Label text="{resourceManager.getString('myResources','LABEL_EXERCISES')}"
+				 paddingLeft="16"
+				 paddingRight="16"
+				 styleName="sectionInfoTitleLabel"/>
+		<s:Label text="{resourceManager.getString('myResources','EXERCISE_SECTION_DESCRIPTION')}"
+				 paddingBottom="16"
+				 paddingLeft="16"
+				 paddingRight="16"/>
+		<skins:HorizontalSeparatorLine width="100%"/>
+	</s:BorderContainer>
+
+
+	<s:HGroup id="videoPlayerAndRecordingControls"
+			  width="100%"
+			  horizontalAlign="center"
+			  verticalAlign="middle"
+			  includeInLayout="false"
+			  visible="false"
+			  paddingTop="16"
+			  paddingLeft="16"
+			  paddingRight="16">
+
+
+		<!-- Video Player -->
+		<s:VGroup>
+			<s:Label id="exerciseTitle"
+					 text="{_exerciseTitle}"
+					 width="100%"
+					 styleName="sectionTitleLabel"/>
+			<!-- w/h = 16:10 -->
+			<videoPlayer:VideoPlayerBabelia id="VP"
+											layoutDirection="ltr"
+											autoPlay="true"
+											skin="white"
+											seek="true"
+											subtitles="true"
+											autoScale="false"
+											arrows="false"
+											subtitlingControls="false"
+											width="500"
+											height="{Math.floor(VP.width * 9 / 16)}"
+											streamSource="{_streamSource}"
+											controlsEnabled="{_exerciseSelected}"/>
+			<videoPlayerControls:ExerciseInfoBox id="ratingShareReport"
+												 width="100%"/>
+		</s:VGroup>
+		<mx:Spacer width="20"/>
+
+		<s:BorderContainer id="guestEditWarningBox"
+						   cornerRadius="8"
+						   borderColor="#FFFFFF"
+						   dropShadowVisible="true">
+			<s:BitmapImage source="@Embed('/resources/images/popup_bgr_excl.png')"
+						   right="0"
+						   top="0"/>
+			<s:VGroup width="100%"
+					  height="100%"
+					  paddingBottom="16"
+					  paddingLeft="16"
+					  paddingRight="16"
+					  paddingTop="16"
+					  verticalAlign="middle">
+				<s:Label id="notLoggedWarning"
+						 styleName="guestVersionWarningLabel"
+						 text="{resourceManager.getString('myResources','LABEL_GUEST_RECORD_WARNING')}"/>
+			</s:VGroup>
+		</s:BorderContainer>
+
+		<!-- Selected Exercise Panel -->
+		<s:BorderContainer id="panelSelectedExercise"
+						   includeInLayout="false"
+						   visible="false"
+						   width="400"
+						   backgroundAlpha="0"
+						   cornerRadius="8">
+			<s:layout>
+				<s:VerticalLayout paddingTop="10"
+								  paddingLeft="10"
+								  paddingRight="10"
+								  paddingBottom="10"/>
+			</s:layout>
+
+			<s:Label text="{resourceManager.getString('myResources', 'MESSAGE_SELECTED_EXERCISE')}"/>
+
+			<s:BorderContainer borderWeight="5"
+							   width="100%"
+							   cornerRadius="8"
+							   borderColor="#38babc"
+							   backgroundAlpha="0">
+				<s:layout>
+					<s:VerticalLayout paddingBottom="16"
+									  paddingLeft="16"
+									  paddingRight="16"
+									  paddingTop="16"/>
+				</s:layout>
+				<s:HGroup>
+					<s:Label text="{resourceManager.getString('myResources', 'MESSAGE_CHOOSE_ROLE')}"/>
+					<mx:ComboBox id="availableRoles"
+								 dataProvider="{_characterNames}"
+								 enabled="{!DataModel.getInstance().recordingExercise}"/>
+				</s:HGroup>
+
+				<s:HGroup>
+					<s:Label text="{resourceManager.getString('myResources', 'MESSAGE_CHOOSE_LOCALE')}"/>
+					<common:LanguageComboBox id="availableLocales"
+											 useCustomDataProvider="true"
+											 customDataProvider="{_locales}"
+											 displayPrompt="false"
+											 change="this.onLocaleComboChanged(event)"
+											 enabled="{!DataModel.getInstance().recordingExercise}"/>
+				</s:HGroup>
+				<mx:Spacer height="5"/>
+				<s:HGroup>
+					<s:Label text="{resourceManager.getString('myResources', 'MESSAGE_CHOOSE_REC_METHOD')}"/>
+					<s:VGroup>
+						<s:RadioButton id="micOnly"
+									   selected="true"
+									   groupName="recMode"
+									   label="{resourceManager.getString('myResources', 'OPTION_MIC_ONLY')}"/>
+						<s:RadioButton id="micAndCam"
+									   groupName="recMode"
+									   label="{resourceManager.getString('myResources', 'OPTION_WEBCAM_AND_MIC')}"/>
+					</s:VGroup>
+				</s:HGroup>
+			</s:BorderContainer>
+
+			<s:HGroup horizontalAlign="right"
+					  width="100%">
+				<skins:IconButton id="startRecordingButton"
+								  styleName="recStartLinkButton"
+								  icon="{DataModel.getInstance().recordingExercise ? abortIcon : recIcon}"
+								  toolTip="{DataModel.getInstance().recordingExercise ? resourceManager.getString('myResources', 'ABORT_RECORDING') : resourceManager.getString('myResources', 'BUTTON_START_RECORDING') }"
+								  enabled="{_rolesReady &amp;&amp; _localesReady &amp;&amp; _cueManagerReady}"
+								  click="onStartRecordingClicked(event)"/>
+			</s:HGroup>
+
+		</s:BorderContainer>
+		<exercises:RecordingEndOptions id="recordingEndOptions"
+									   includeInLayout="false"
+									   visible="false"
+									   width="400"/>
+
+	</s:HGroup>
+
+	<s:VGroup width="100%"
+			  horizontalAlign="left"
+			  paddingLeft="16"
+			  paddingRight="16"
+			  paddingTop="16">
+		<s:Label text="{resourceManager.getString('myResources','EXERCISE_LIST')}"
+				 styleName="sectionTitleLabel"
+				 id="exerciseListTitleLabel"/>
+		<s:Line width="{exerciseListTitleLabel.width}">
+			<s:stroke>
+				<mx:SolidColorStroke weight="3"
+									 color="{exerciseListTitleLabel.getStyle('color')}"/>
+			</s:stroke>
+		</s:Line>
+	</s:VGroup>
+
+	<!-- Video List -->
+	<exercises:VideoList width="100%"
+						 id="exerciseList"
+						 paddingLeft="16"
+						 paddingRight="16"
+						 paddingTop="16"
+						 paddingBottom="16"/>
+
+</s:VGroup>

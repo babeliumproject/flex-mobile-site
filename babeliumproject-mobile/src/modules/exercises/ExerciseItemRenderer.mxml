@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+				xmlns:s="library://ns.adobe.com/flex/spark"
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				xmlns:hulstkamp="com.hulstkamp.*"
+				autoDrawBackground="true"
+				creationComplete="completeHandler()"
+				xmlns:skins="skins.*">
+
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle"
+							paddingTop="4"
+							paddingBottom="4"
+							paddingLeft="8"
+							paddingRight="8"/>
+	</s:layout>
+
+	<s:Group width="120"
+			 height="90">
+		<mx:Image id="thumbnail"
+				  scaleContent="true"
+				  source="{getImageSource(data as ExerciseVO)}"
+				  autoLoad="true"
+				  width="120"
+				  height="90"
+				  toolTip="{data.title}"/>
+		<s:TextInput text="{_timeFormatter.format(data.duration)}"
+					 styleName="videoDurationLabel"
+					 x="88"
+					 y="0"
+					 width="32"
+					 height="16"
+					 editable="false"
+					 selectable="false"/>
+	</s:Group>
+
+	<s:VGroup width="100%"
+			  horizontalAlign="left"
+			  gap="2">
+		<s:Label id="title"
+				 text="{data.title}"
+				 width="320"
+				 styleName="boldLabel"/>
+		<s:Line width="320"
+				alpha="0.5">
+			<s:stroke>
+				<mx:SolidColorStroke weight="2"
+									 color="#aaaaaa"/>
+			</s:stroke>
+		</s:Line>
+		<s:HGroup gap="20"
+				  verticalAlign="middle">
+			<s:HGroup gap="2"
+					  verticalAlign="middle">
+				<mx:Image width="16"
+						  height="16"
+						  toolTip="{exerciseLanguage.source}"
+						  source="{getFlagSource(data as ExerciseVO)}"
+						  id="exerciseLanguage"/>
+				<s:Label text="{getLevelCorrespondence(data.avgDifficulty)}"
+						 styleName="boldYellowLabel"/>
+			</s:HGroup>
+			<hulstkamp:AhFxRatingComponent rating="{data.avgRating}"
+										   enabled="false"
+										   skinClass="com.hulstkamp.AhRatingComponentStarSkin"
+										   scaleX="1.2"
+										   scaleY="1.2"/>
+			<s:Label text="{dateFormatter.format(data.addingDate)}"
+					 styleName="boldYellowLabel"/>
+		</s:HGroup>
+
+
+		<s:Label text="{data.description}"
+				 width="320"
+				 maxDisplayedLines="3"
+				 toolTip="{data.description}"/>
+		<s:HGroup horizontalAlign="right"
+				  verticalAlign="middle"
+				  width="320">
+			<s:Label text="{resourceManager.getString('myResources','USER')+':'}"/>
+			<skins:IconButton label="{data.userName}"
+							  styleName="commonLinkButton"/>
+		</s:HGroup>
+		<s:HGroup>
+			<s:Label text="{resourceManager.getString('myResources','TAGS')+':'}"/>
+			<s:HGroup id="tagRow"/>
+		</s:HGroup>
+		<s:HGroup verticalAlign="middle"
+				  width="100%">
+			<mx:Image id="license"
+					  scaleContent="true"
+					  source="{getLicenseSource(data as ExerciseVO)}"
+					  autoLoad="true"
+					  click="licenseClickHandler(event)"
+					  toolTip="{_licenseData.tooltip}"
+					  width="80"
+					  height="15"
+					  useHandCursor="true"
+					  buttonMode="true"/>
+			<!--
+			<s:Label text="{resourceManager.getString('myResources','AUTHOR_PROVIDED_BY')}"
+					 visible="{data.reference}"/>-->
+			<skins:IconButton id="referenceUrl"
+							  width="240"
+							  label="{data.reference}"
+							  click="referenceClickHandler(event)"
+							  styleName="commonLinkButton"
+							  enabled="{checkExternalUrl(data.reference)}"/>
+		</s:HGroup>
+
+	</s:VGroup>
+
+	<fx:Declarations>
+		<mx:DateFormatter id="dateFormatter"
+						  formatString="{resourceManager.getString('myResources','DATE_FORMAT')}"/>
+	</fx:Declarations>
+
+
+	<fx:Script>
+		<![CDATA[
+			import control.CuePointManager;
+
+			import events.ExerciseEvent;
+			import events.ExerciseRoleEvent;
+			import events.SubtitleEvent;
+
+			import model.DataModel;
+
+			import mx.controls.Text;
+			import mx.formatters.NumberBaseRoundType;
+			import mx.formatters.NumberFormatter;
+			import mx.formatters.SwitchSymbolFormatter;
+
+			import view.common.LicenseResource;
+			import view.common.LocaleFlagResource;
+			import view.common.TimeFormatter;
+
+			import vo.ExerciseRoleVO;
+			import vo.ExerciseVO;
+			import vo.LicenseVO;
+			import vo.SubtitleAndSubtitleLinesVO;
+
+			private const MAX_DESCRIPTION_CHARS:int=120;
+
+			private var _data:Object;
+
+			private var _creationComplete:Boolean=false;
+
+			[Bindable]
+			private var _licenseData:LicenseVO=new LicenseVO();
+
+			[Bindable]
+			private var _timeFormatter:TimeFormatter=new TimeFormatter();
+
+			public function completeHandler():void
+			{
+				_data=data;
+				_creationComplete=true;
+
+				setupReferenceComponent();
+			}
+
+			private function setupReferenceComponent():void
+			{
+				if (checkExternalUrl(data.reference))
+				{
+					referenceUrl.setStyle('textDecoration', 'underline');
+				}
+				else
+				{
+					referenceUrl.setStyle('skin', null);
+					referenceUrl.useHandCursor=false;
+				}
+			}
+
+			private function licenseClickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest(_licenseData.licenseUrl));
+			}
+
+			private function referenceClickHandler(event:MouseEvent):void
+			{
+				if (checkExternalUrl(data.reference))
+					navigateToURL(new URLRequest(data.reference), '_blank');
+			}
+
+			public function getLevelCorrespondence(avgDifficulty:Number):String
+			{
+				var numFormat:NumberFormatter=new NumberFormatter();
+				numFormat.precision=0;
+				numFormat.rounding=NumberBaseRoundType.NEAREST;
+				var roundedAvgDifficulty:int=int(numFormat.format(avgDifficulty));
+				switch (roundedAvgDifficulty)
+				{
+					case 1:
+						return 'A1';
+						break;
+					case 2:
+						return 'A2';
+						break;
+					case 3:
+						return 'B1';
+						break;
+					case 4:
+						return 'B2';
+						break;
+					case 5:
+						return 'C1';
+						break;
+					default:
+						return '';
+						break;
+				}
+			}
+
+			public function getFlagSource(temp:ExerciseVO):String
+			{
+				return LocaleFlagResource.getFlagResource(temp.language);
+			}
+
+			public function getImageSource(temp:ExerciseVO):String
+			{
+				var url:String='';
+				if (temp.source == "Red5")
+					url=DataModel.getInstance().thumbURL + "/" + temp.thumbnailUri;
+				else
+					url=temp.thumbnailUri;
+				return url;
+			}
+
+			public function getLicenseSource(temp:ExerciseVO):String
+			{
+				_licenseData=LicenseResource.getLicenseData(temp.license);
+				return _licenseData.imageResource;
+			}
+
+			//http://livedocs.adobe.com/flex/3/langref/flash/net/package.html#navigateToURL%28%29
+			private function addHttpIfneeded(url:String):String
+			{
+				var urlparse:String=url;
+				var httpPattern:RegExp=new RegExp("^http[s]?\:\\/\\/");
+				if (httpPattern.exec(urlparse) == null)
+				{
+					urlparse="http://" + urlparse;
+				}
+				return urlparse;
+			}
+
+			private function checkExternalUrl(url:String):Boolean
+			{
+				var pattern:RegExp=new RegExp("^http[s]?\:\\/\\/([^\\/]+)");
+				var result:Object=pattern.exec(url);
+				if (result == null || url.length >= 4096)
+				{
+					return (false);
+				}
+				return (true);
+			}
+		]]>
+	</fx:Script>
+
+</s:ItemRenderer>

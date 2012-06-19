@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+						 xmlns:s="library://ns.adobe.com/flex/spark"
+						 xmlns:mx="library://ns.adobe.com/flex/mx"
+						 xmlns:skins="skins.*">
+	<s:layout>
+		<s:VerticalLayout 
+						  
+						  paddingRight="10"/>
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import events.RecordingEndOptionEvent;
+			import model.DataModel;
+		]]>
+	</fx:Script>
+	
+	
+	<s:Label text="AVAILABLE ACTIONS"  fontSize="15"/>
+
+	<s:VGroup horizontalAlign="left"
+			   verticalAlign="top"
+			  width="100%">
+		<s:HGroup id="first_option" width="100%">
+			
+		
+		<skins:IconButton label="{resourceManager.getString('myResources','BUTTON_SAVE_RESPONSE')}"
+						  click="dispatchEvent(new RecordingEndOptionEvent(RecordingEndOptionEvent.SAVE_RESPONSE))"
+						  styleName="watchRecordedButton"
+						  width="100%"
+						  enabled="{ !DataModel.getInstance().recordingExercise }"
+						  skinClass="skins.IconButtonSkin"
+						  icon="@Embed('/resources/images/eo_save_response.png')"/>
+		<skins:IconButton label="{resourceManager.getString('myResources','BUTTON_WATCH_RESPONSE')}"
+						  click="dispatchEvent(new RecordingEndOptionEvent(RecordingEndOptionEvent.VIEW_BOTH))"
+						  styleName="watchRecordedButton"
+						  width="100%"
+						  enabled="{ !DataModel.getInstance().recordingExercise }"
+						  skinClass="skins.IconButtonSkin"
+						  icon="@Embed('/resources/images/eo_watch_sim.png')"/>
+			
+		</s:HGroup>
+		<!--
+		<skins:IconButton label="{resourceManager.getString('myResources','BUTTON_WATCH_RESPONSE')}"
+						  click="dispatchEvent(new RecordingEndOptionEvent(RecordingEndOptionEvent.VIEW_RESPONSE))"
+						  styleName="watchRecordedButton"
+						  width="100%"
+						  skinClass="skins.IconButtonSkin"
+						  icon="@Embed('/resources/images/eo_watch_resp.png')"/>
+		-->
+		<s:HGroup width="100%">
+			
+		<skins:IconButton label="{resourceManager.getString('myResources', 'BUTTON_RECORD_AGAIN')}"
+						  click="dispatchEvent(new RecordingEndOptionEvent(RecordingEndOptionEvent.RECORD_AGAIN))"
+						  styleName="watchRecordedButton"
+						  width="100%"
+						  enabled="{ !DataModel.getInstance().recordingExercise }"
+						  skinClass="skins.IconButtonSkin"
+						  icon="@Embed('/resources/images/button_rec.png')"/>
+
+		<skins:IconButton label="{resourceManager.getString('myResources','BUTTON_DISCARD_RESPONSE')}"
+						  click="dispatchEvent(new RecordingEndOptionEvent(RecordingEndOptionEvent.DISCARD_RESPONSE))"
+						  styleName="watchRecordedButton"
+						  width="100%"
+						  skinClass="skins.IconButtonSkin"
+						  icon="@Embed('/resources/images/button_abort.png')"/>
+		</s:HGroup>
+
+	</s:VGroup>
+</s:Group>

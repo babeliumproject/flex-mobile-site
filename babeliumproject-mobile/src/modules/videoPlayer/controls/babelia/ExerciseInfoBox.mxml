@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+				   xmlns:s="library://ns.adobe.com/flex/spark"
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   xmlns:hulstkamp="com.hulstkamp.*"
+				   xmlns:skins="skins.*">
+
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="left"
+						  paddingTop="2"
+						  paddingBottom="2"
+						  paddingLeft="2"
+						  paddingRight="2"
+						  gap="0"/>
+	</s:layout>
+
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.utils.StringUtil;
+			
+			import events.ExerciseEvent;
+			import events.SearchEvent;
+			//import events.ViewChangeEvent;
+			
+			import model.DataModel;
+			
+			//import mx.controls.LinkButton;
+			//import mx.core.Application;
+			import mx.core.FlexGlobals;
+			import mx.managers.PopUpManager;
+			
+			//import view.common.ReportInappropriatePopUp;
+			
+			import vo.ExerciseReportVO;
+			import vo.ExerciseScoreVO;
+			import vo.ExerciseVO;
+
+			[Bindable]
+			private var _exercise:ExerciseVO=null;
+
+			[Bindable]
+			private var _tags:Array;
+
+			[Bindable]
+			private var _exerciseRating:int=0;
+
+			[Bindable]
+			private var _dataAvailable:Boolean=false;
+
+			//private var reportPopUp:ReportInappropriatePopUp;
+
+			public function set exerciseData(exercise:ExerciseVO):void
+			{
+				if (exercise)
+				{
+					_exercise=exercise;
+					_exerciseRating=exercise.avgRating;
+					_dataAvailable=true;
+					updateComponents();
+					
+				}
+				else
+				{
+					_dataAvailable=false;
+					disableComponents();
+				}
+			}
+
+			public function get exerciseData():ExerciseVO
+			{
+				return _exercise;
+			}
+
+			private function updateComponents():void
+			{
+				rating.rating=_exerciseRating;
+				exDescription.text=_exercise.description;
+
+				var score:ExerciseScoreVO=new ExerciseScoreVO();
+				var report:ExerciseReportVO=new ExerciseReportVO();
+				score.exerciseId=_exercise.id;
+				report.exerciseId=_exercise.id;
+
+				new ExerciseEvent(ExerciseEvent.USER_RATED_EXERCISE, null, null, score).dispatch();
+				new ExerciseEvent(ExerciseEvent.USER_REPORTED_EXERCISE, null, report, null).dispatch();
+			}
+
+			private function disableComponents():void
+			{
+				if (DataModel.getInstance().isLoggedIn == false || _dataAvailable == false)
+				{
+					_exerciseRating=0;
+					
+				}
+			}
+
+		
+
+			protected function ratingClickHandler(event:MouseEvent):void
+			{
+					
+				if (DataModel.getInstance().isLoggedIn && _dataAvailable)
+				{
+					
+					var score:ExerciseScoreVO=new ExerciseScoreVO();
+					score.suggestedScore=rating.rating;
+					score.exerciseId=_exercise.id;
+					new ExerciseEvent(ExerciseEvent.RATE_EXERCISE, null, null, score).dispatch();
+				}
+			}
+
+		
+		]]>
+	</fx:Script>
+
+	<s:HGroup id="ratingAndReportBox"
+			  width="100%">
+		<s:HGroup 
+				  paddingLeft="4">
+			<hulstkamp:AhFxRatingComponent id="rating"
+										   rating="{_exerciseRating}"
+										   click="ratingClickHandler(event)"
+										   skinClass="com.hulstkamp.AhRatingComponentStarSkin"
+										   scaleX="1.5"
+										   scaleY="1.5"
+										    enabled="{DataModel.getInstance().isLoggedIn &amp;&amp; !DataModel.getInstance().userRatedExercise &amp;&amp; _dataAvailable  }"/>
+			<s:Label id="exDescription"
+					 fontSize="13"
+					 width="100%" verticalAlign="bottom" height="90%" paddingLeft="16"/>
+		</s:HGroup>
+		
+	</s:HGroup>
+	
+		<!--
+		<mx:Tile id="exerciseTagsBox"
+				 width="100%"
+				 horizontalGap="1"
+				 verticalGap="1"
+				 autoLayout="true">
+		</mx:Tile>-->
+	
+
+</s:Group>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:utils="utils.*" skinClass="skins.CustomViewBackground">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			//import control.BabeliaBrowserManager;
+			
+			import events.HomepageEvent;
+			
+			import model.DataModel;
+			
+			import mx.collections.ArrayCollection;
+			
+			import spark.events.IndexChangeEvent;
+			
+			import vo.ExerciseVO;
+			
+			[Bindable]
+			private var _dataProvider:ArrayCollection;
+			
+			protected function set retrieveLatestUploadedVideos(value:Boolean):void
+			{
+				
+				if (DataModel.getInstance().isLoggedIn == true)
+				{
+					new HomepageEvent(HomepageEvent.LATEST_UPLOADED_VIDEOS).dispatch();
+				}
+			}
+			
+			protected function set handleSignedInLatestUploadedVideos(value:Boolean):void
+			{
+				var siluvDataprovider:ArrayCollection=DataModel.getInstance().signedInLatestUploadedVideos;
+				_dataProvider=siluvDataprovider;
+				
+			}
+			
+			protected function latestUploadedVideosDataGroup_changeHandler(event:IndexChangeEvent):void
+			{
+				var obj:ExerciseVO=List(event.target).selectedItem as ExerciseVO;
+				if (obj.isSubtitled)
+				{
+					//call startconetion with red5
+				navigator.pushView(View.SelectedVideo,obj);
+				}
+				else
+				{
+					//we can't add subtitules in mobile devices...
+				}
+				List(event.target).selectedItem = null;
+				
+				//BabeliaBrowserManager.getInstance().parseURL(null);
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Binding source="{DataModel.getInstance().isLoggedIn}"
+				destination="retrieveLatestUploadedVideos"/>
+	<fx:Binding source="{DataModel.getInstance().signedInLatestUploadedVideosRetrieved}"
+				destination="handleSignedInLatestUploadedVideos"/>
+	
+	<s:VGroup width="100%" height="100%">
+		<utils:search width="100%"/>
+		<s:VGroup horizontalAlign="center" width="100%" paddingTop="16" paddingBottom="16">
+			<s:Label text="LatestUploadVideos"
+					 styleName="sectionTitleLabel"
+					 id="userProfileTitleLabel"/>
+			<s:Line width="{userProfileTitleLabel.width}">
+				<s:stroke>
+					<s:SolidColorStroke weight="3"
+										color="{userProfileTitleLabel.getStyle('color')}"/>
+				</s:stroke>
+			</s:Line>
+		</s:VGroup>
+		
+		<s:List id="latestUploadedVideosDataGroup"
+				top="0" bottom="0" left="0" right="0"
+				width="100%" 
+				change="latestUploadedVideosDataGroup_changeHandler(event)"
+				skinClass="skins.TransparentBgListSkin"
+				height="100%"
+				dataProvider="{_dataProvider}"
+				itemRenderer="utils.ExerciseItemRenderer">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+		</s:List>
+	</s:VGroup>
+	
+		
+	
+	
+	
+	
+	
+	
+</s:View>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VideoPlayerSkin>
+	<Component name="VideoPlayerBabelia">
+		<Property name="bgColor">0xFFFFFF</Property>
+		<Property name="roleBgColor">0xFFFFFF</Property>
+		<Property name="roleBorderColor">0xa7a7a7</Property>
+	</Component>
+	<Component name="ArrowPanel">
+		<Property name="bgColor">0xdbd7bf</Property>
+		<Property name="hlColor">0xFFCB99</Property>
+		<Property name="borderColor">0xa8a592</Property>
+		<Property name="borderWeight">1</Property>
+		<Property name="cornerRadius">0</Property>
+		<Property name="bgAlpha">65</Property>
+	</Component>
+	<Component name="LocaleComboBox">
+		<Property name="bgColor">0xFFFFFF</Property>
+	</Component>
+	<Component name="RoleTalkingPanel">
+		<Property name="bgColor">0xdf5c02</Property>
+		<Property name="textColor">0xfcfaeb</Property>
+		<Property name="roleColor">0x783101</Property>
+		<Property name="barColor">0xdf5c02</Property>
+		<Property name="hlColor">0xFFCB99</Property>
+		<Property name="borderColor">0x913b01</Property>
+		<Property name="borderWeight">1</Property>
+		<Property name="cornerRadius">0</Property>
+	</Component>
+	<Component name="SubtitleButton">
+		<Property name="bgColor">0xFFFFFF</Property>
+		<Property name="bgGradientAngle">90</Property>
+		<Property name="bgGradientStartColor">0xffffff</Property>
+		<Property name="bgGradientEndColor">0xd8d8d8</Property>
+		<Property name="bgGradientStartAlpha">100</Property>
+		<Property name="bgGradientEndAlpha">100</Property>
+		<Property name="bgGradientStartRatio">120</Property>
+		<Property name="bgGradientEndRatio">255</Property>
+		<Property name="borderColor">0xa7a7a7</Property>
+		<Property name="borderWeight">1</Property>
+	</Component>
+	<Component name="SubtitleTextBox">
+		<Property name="bgColor">0x000000</Property>
+		<Property name="boxColor">0x000000</Property>
+		<Property name="textColor">0xFFFFFF</Property>
+	</Component>
+	<Component name="AudioSlider">
+		<Property name="bgColor">0xFFFFFF</Property>
+		<Property name="scrubberBorderColor">0x000088</Property>
+		<Property name="muteColor">0x000000</Property>
+		<Property name="muteOverBgColor">0xCECECE</Property>
+		<Property name="bgGradientAngle">90</Property>
+		<Property name="bgGradientStartColor">0xffffff</Property>
+		<Property name="bgGradientEndColor">0xd8d8d8</Property>
+		<Property name="bgGradientStartAlpha">100</Property>
+		<Property name="bgGradientEndAlpha">100</Property>
+		<Property name="bgGradientStartRatio">120</Property>
+		<Property name="bgGradientEndRatio">255</Property>
+		<Property name="borderColor">0xa7a7a7</Property>
+		<Property name="borderWeight">1</Property>
+	</Component>
+	<Component name="ElapsedTime">
+		<Property name="bgColor">0xFFFFFF</Property>
+		<Property name="textColor">0x7B970A</Property>
+		<Property name="bgGradientAngle">90</Property>
+		<Property name="bgGradientStartColor">0xffffff</Property>
+		<Property name="bgGradientEndColor">0xd8d8d8</Property>
+		<Property name="bgGradientStartAlpha">100</Property>
+		<Property name="bgGradientEndAlpha">100</Property>
+		<Property name="bgGradientStartRatio">120</Property>
+		<Property name="bgGradientEndRatio">255</Property>
+		<Property name="borderColor">0xa7a7a7</Property>
+		<Property name="borderWeight">1</Property>
+	</Component>
+	<Component name="ScrubberBar">
+		<Property name="bgColor">0xFFFFFF</Property>
+		<Property name="scrubberBorderColor">0x888888</Property>
+		<Property name="bgGradientAngle">90</Property>
+		<Property name="bgGradientStartColor">0xffffff</Property>
+		<Property name="bgGradientEndColor">0xd8d8d8</Property>
+		<Property name="bgGradientStartAlpha">100</Property>
+		<Property name="bgGradientEndAlpha">100</Property>
+		<Property name="bgGradientStartRatio">120</Property>
+		<Property name="bgGradientEndRatio">255</Property>
+		<Property name="borderColor">0xa7a7a7</Property>
+		<Property name="borderWeight">1</Property>
+	</Component>
+	<Component name="PlayButton">
+		<Property name="bgColor">0xFFFFFF</Property>
+		<Property name="overBgColor">0xCECECE</Property>
+		<Property name="iconColor">0x000000</Property>
+		<Property name="bgGradientAngle">90</Property>
+		<Property name="bgGradientStartColor">0xffffff</Property>
+		<Property name="bgGradientEndColor">0xd8d8d8</Property>
+		<Property name="bgGradientStartAlpha">100</Property>
+		<Property name="bgGradientEndAlpha">100</Property>
+		<Property name="bgGradientStartRatio">120</Property>
+		<Property name="bgGradientEndRatio">255</Property>
+		<Property name="borderColor">0xa7a7a7</Property>
+		<Property name="borderWeight">1</Property>
+	</Component>
+	<Component name="StopButton">
+		<Property name="bgColor">0xFFFFFF</Property>
+		<Property name="overBgColor">0xCECECE</Property>
+		<Property name="iconColor">0x000000</Property>
+		<Property name="bgGradientAngle">90</Property>
+		<Property name="bgGradientStartColor">0xffffff</Property>
+		<Property name="bgGradientEndColor">0xd8d8d8</Property>
+		<Property name="bgGradientStartAlpha">100</Property>
+		<Property name="bgGradientEndAlpha">100</Property>
+		<Property name="bgGradientStartRatio">120</Property>
+		<Property name="bgGradientEndRatio">255</Property>
+		<Property name="borderColor">0xa7a7a7</Property>
+		<Property name="borderWeight">1</Property>
+	</Component>
+	<Component name="SubtitleStartButton">
+		<Property name="bgColor">0xFFFFFF</Property>
+		<Property name="overBgColor">0xCECECE</Property>
+		<Property name="iconColor">0x000000</Property>
+	</Component>
+	<Component name="SubtitleEndButton">
+		<Property name="bgColor">0xFFFFFF</Property>
+		<Property name="overBgColor">0xCECECE</Property>
+		<Property name="iconColor">0x000000</Property>
+	</Component>
+	<Component name="SubtitleStartEndButton">
+		<Property name="bgColor">0xFFFFFF</Property>
+		<Property name="overBgColor">0xCECECE</Property>
+		<Property name="iconColor">0x000000</Property>
+		<Property name="bgGradientAngle">90</Property>
+		<Property name="bgGradientStartColor">0xffffff</Property>
+		<Property name="bgGradientEndColor">0xd8d8d8</Property>
+		<Property name="bgGradientStartAlpha">100</Property>
+		<Property name="bgGradientEndAlpha">100</Property>
+		<Property name="bgGradientStartRatio">120</Property>
+		<Property name="bgGradientEndRatio">255</Property>
+		<Property name="borderColor">0xa7a7a7</Property>
+		<Property name="borderWeight">1</Property>
+	</Component>
+	<Component name="MicActivityBar">
+		<Property name="bgColor">0x000000</Property>
+		<Property name="barBgColor">0xCECECE</Property>
+		<Property name="barColor">0x008EAD</Property>
+		<Property name="textColor">0x000000</Property>
+	</Component>
+</VideoPlayerSkin> 

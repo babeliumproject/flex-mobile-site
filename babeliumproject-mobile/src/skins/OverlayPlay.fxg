@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Graphic xmlns:ATE="http://ns.adobe.com/ate/2009" 
+		 xmlns:ai="http://ns.adobe.com/ai/2009" 
+		 xmlns:fc="http://ns.adobe.com/flashcatalyst/2009" 
+		 xmlns:d="http://ns.adobe.com/fxg/2008/dt" 
+		 xmlns="http://ns.adobe.com/fxg/2008" 
+		 xmlns:flm="http://ns.adobe.com/flame/2008" version="2.0">
+	<Group blendMode="normal">
+		<Group flm:knockout="false">
+			<Path winding="nonZero" x="0.5" y="0.5" data="M 31.5 63.001 C 14.131 63.001 0 48.87 0 31.5 C 0 14.131 14.131 0 31.5 0 C 48.869 0 63 14.131 63 31.5 C 63 48.87 48.869 63.001 31.5 63.001 Z">
+				<fill>
+					<RadialGradient scaleX="64.9687" scaleY="64.9687" x="31.436" y="54.073">
+						<GradientEntry color="#E7ECEF" ratio="0"/>
+						<GradientEntry color="#BFC8CD" ratio="1"/>
+					</RadialGradient>
+				</fill>
+			</Path>
+			<Path winding="nonZero" data="M 32 1 C 49.093 1 63 14.907 63 32 C 63 49.094 49.093 63.001 32 63.001 C 14.907 63.001 1 49.094 1 32 C 1 14.907 14.907 1 32 1 M 32 0 C 14.326 0 0 14.328 0 32 C 0 49.674 14.326 64.001 32 64.001 C 49.672 64.001 64 49.674 64 32 C 64 14.328 49.672 0 32 0 L 32 0 Z">
+				<fill>
+					<SolidColor color="#8B98A0"/>
+				</fill>
+			</Path>
+		</Group>
+		<Group x="9" y="9" alpha="0.8" blendMode="multiply" flm:isolated="false" flm:knockout="false">
+			<Path winding="nonZero" x="0.602" y="0.602" data="M 43.797 0 C 49.117 5.568 52.397 13.106 52.397 21.398 C 52.397 38.492 38.492 52.399 21.398 52.399 C 13.106 52.399 5.568 49.12 0 43.797 C 5.648 49.708 13.598 53.399 22.398 53.399 C 39.492 53.399 53.398 39.494 53.398 22.398 C 53.398 13.598 49.705 5.648 43.797 0 Z">
+				<fill>
+					<LinearGradient rotation="75.3757" scaleX="65.6597" x="21.493" y="11.151">
+						<GradientEntry color="#FFFFFF" ratio="0"/>
+						<GradientEntry color="#B7C6CE" ratio="1"/>
+					</LinearGradient>
+				</fill>
+			</Path>
+		</Group>
+		<Group x="2" y="2" blendMode="screen" flm:isolated="false" flm:knockout="false">
+			<Group flm:knockout="false">
+				<Path winding="nonZero" y="-0.002" data="M 22.354 35.705 C 33.229 26.346 47.303 17.609 59.432 24.197 C 56.719 10.424 44.555 0 30 0 C 13.457 0 0 13.461 0 30.004 C 0 34.012 0.795 37.836 2.229 41.334 C 6.986 42.531 14.387 42.565 22.354 35.705 Z">
+					<fill>
+						<LinearGradient rotation="74.6308" scaleX="43.1579" x="21.537" y="-0.788">
+							<GradientEntry color="#FFFBD4" ratio="0"/>
+							<GradientEntry ratio="1"/>
+						</LinearGradient>
+					</fill>
+				</Path>
+			</Group>
+		</Group>
+		<Group x="2" y="2" blendMode="screen" flm:isolated="false" flm:knockout="false">
+			<Path winding="nonZero" y="-0.002" data="M 2.002 32.006 C 2.002 15.463 15.459 2.002 32.002 2.002 C 39.764 2.002 46.848 4.967 52.18 9.822 C 46.688 3.791 38.777 0 30 0 C 13.457 0 0 13.461 0 30.004 C 0 38.783 3.791 46.693 9.822 52.186 C 4.967 46.852 2.002 39.77 2.002 32.006 Z">
+				<fill>
+					<LinearGradient rotation="70.974" scaleX="65.2983" x="16.164" y="-6.356">
+						<GradientEntry color="#FFFFFF" ratio="0"/>
+						<GradientEntry ratio="1"/>
+					</LinearGradient>
+				</fill>
+			</Path>
+		</Group>
+	</Group>
+	<Path alpha="0.8" blendMode="multiply" winding="nonZero" x="25" y="19.001" data="M 0 27.999 L 24.801 14 L 0 0 L 0 27.999 Z">
+		<fill>
+			<LinearGradient rotation="270" scaleX="28.1006" x="12.4" y="27.904">
+				<GradientEntry color="#FFFFFF" ratio="0"/>
+				<GradientEntry color="#B7C6CE" ratio="1"/>
+			</LinearGradient>
+		</fill>
+	</Path>
+	<Path winding="nonZero" x="24" y="18" data="M 0 27.999 L 24.801 14 L 0 0 L 0 27.999 Z">
+		<fill>
+			<SolidColor/>
+		</fill>
+	</Path>
+	<Path visible="false" winding="nonZero" data="M 0 0 L 64 0 L 64 64 L 0 64 L 0 0 Z"/>
+</Graphic>

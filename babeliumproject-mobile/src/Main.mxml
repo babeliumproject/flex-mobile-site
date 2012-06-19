@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ViewNavigatorApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+							xmlns:s="library://ns.adobe.com/flex/spark"
+							xmlns:business="business.*"
+							xmlns:utils="utils.*"
+							xmlns:control="control.*"
+							xmlns:model="model.*"
+							width="100%" applicationDPI="240" firstView="View.MobileProjectHome">
+	
+	
+	
+	
+	
+	<fx:Script>
+         
+		<![CDATA[
+			import View.Home;
+			import events.LoginEvent;
+			import model.DataModel;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			
+			protected function evaluate_clickHandler(event:MouseEvent):void
+			{
+				navigator.pushView(View.Evaluate,null,null,slideTrans);
+				
+				
+			}
+			
+			protected function upload_video(event:MouseEvent):void
+			{
+				navigator.pushView(View.Upload_Video,null,null,slideTrans);
+				
+			}
+			
+			protected function practice(event:MouseEvent):void
+			{
+				navigator.pushView(View.Practice,null,null,slideTrans);
+				
+			}
+			
+			protected function menu(event:MouseEvent):void
+			{
+				navigator.pushView(View.Home,null,null,slideTrans);
+				// TODO Auto-generated method stub
+				
+			}
+			
+			
+			protected function cb_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+				// get data from the server
+				
+				
+			}
+			
+			protected function list_changeHandler(event:IndexChangeEvent):void
+				
+			{
+				if(list.selectedItem=="My Profile"){
+					navigator.pushView(View.User_Profile,null,null,slideTrans);
+					
+				}
+					
+				else{
+					if(list.selectedItem=="My Videos"){
+						navigator.pushView(View.My_Videos,null,null,slideTrans);
+					}
+					else{
+						if(list.selectedItem=="About Us"){
+							navigator.pushView(View.About,null,null,slideTrans);
+						}
+						else if(list.selectedItem=="Log Out"){
+							//Log out User call  log out event!
+							new LoginEvent(LoginEvent.SIGN_OUT, null).dispatch();
+							navigator.popToFirstView(null);
+							
+						}
+					}
+				}
+				cb.closeDropDown();
+				List(event.target).selectedItem=null;
+				
+				// TODO Auto-generated method stub
+				
+			}
+			
+		]]>
+		
+	</fx:Script>
+	
+	
+	
+	
+	<s:navigationContent>
+		
+		<s:Button  id="menu_button" icon="assets/home.png" click="menu(event)"/>
+	</s:navigationContent>
+	
+	<s:titleContent>
+		<s:Group width="100%" >
+			
+			<s:layout>
+				<s:HorizontalLayout>
+					
+				</s:HorizontalLayout>
+			</s:layout>
+			<s:HGroup width="33%" id="practice_group" horizontalAlign="center">
+				
+				<s:Image  width="34"  height="34" buttonMode="true" click="practice(event)"
+						  source="assets/Practice.png" />
+			</s:HGroup>
+			<s:HGroup width="33%" id="evaluate_group" horizontalAlign="center">
+				
+				
+				<s:Image  width="34" height="34" buttonMode="true"
+						  source="assets/evaluate.png" click="evaluate_clickHandler(event)"/>
+			</s:HGroup>
+			
+			<s:HGroup width="33%" id="upload_group" horizontalAlign="center">
+				
+				
+				<s:Image  width="34" height="34" buttonMode="true"
+						  source="assets/upload.png" click="upload_video(event)"/>
+				
+			</s:HGroup>
+			
+		</s:Group>
+		
+	</s:titleContent>
+	
+	<s:actionContent>
+		<s:CalloutButton id="cb" icon="assets/user.png" verticalPosition="after" calloutDestructionPolicy="never" creationComplete="cb_creationCompleteHandler(event)">
+			<s:calloutLayout>
+				<s:VerticalLayout paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" horizontalAlign="center" gap="5">
+				</s:VerticalLayout>
+			</s:calloutLayout>
+			<s:calloutContent >
+				<s:VGroup paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" horizontalAlign="center">
+					<s:List id="list" dataProvider="{model.DataModel.getInstance().userArrayCollection}"  width="200" change="list_changeHandler(event)"/>
+				</s:VGroup>
+			</s:calloutContent>
+		</s:CalloutButton>
+	</s:actionContent>
+	
+	
+	
+	
+	
+	
+	<fx:Style source="Main.css"/>
+	
+	<fx:Declarations>
+		<business:Services/>
+		
+		<control:Controller/>
+		
+		
+		
+		<s:SlideViewTransition id="slideTrans" duration="0"/>
+		
+		
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	
+</s:ViewNavigatorApplication>

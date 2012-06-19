@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:exercises="modules.main.*"
+		  width="100%"
+		  horizontalAlign="center"
+		  creationComplete="onComplete()"
+		  xmlns:exercises1="commands.exercises.*">
+
+	<fx:Script>
+		<![CDATA[
+			import events.ExerciseEvent;
+			
+			import model.DataModel;
+			
+			import modules.main.VideoPaginator;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.Application;
+			import mx.core.FlexGlobals;
+			
+			import spark.components.Button;
+			
+			import vo.ExerciseVO;
+
+
+			[Bindable]
+			private var _dataProvider:ArrayCollection;
+
+			[Bindable]
+			private var _currentPage:int=1;
+
+			public var thumbURL:String='';
+
+			public function onComplete():void
+			{
+				thumbURL=DataModel.getInstance().thumbURL;
+				//new ExerciseEvent(ExerciseEvent.GET_RECORDABLE_EXERCISES).dispatch();
+			}
+
+			public function set handleExercisesRetrieve(value:Boolean):void
+			{
+				if (DataModel.getInstance().availableExercisesRetrieved.getItemAt(DataModel.RECORDING_MODULE))
+				{
+					//exerciseListDatagrid.rowCount=DataModel.getInstance().availableRecordableExercises.length;
+					_dataProvider=DataModel.getInstance().availableRecordableExercises;
+
+					createPagination();
+
+					DataModel.getInstance().availableExercisesRetrieved.setItemAt(false, DataModel.RECORDING_MODULE);
+				}
+			}
+			
+			public function set retrieveCustomizedExercises(value:Boolean):void{
+				new ExerciseEvent(ExerciseEvent.GET_RECORDABLE_EXERCISES).dispatch();
+			}
+
+			public function createPagination():void
+			{
+				VideoPaginator.createPaginationMenu(_dataProvider.length, DataModel.getInstance().pageSize, _currentPage, DataModel.getInstance().numberOfPagesNav, paginationBox, navigateToPage);
+				refreshDataProvider();
+			}
+
+			private function navigateToPage(event:MouseEvent):void
+			{
+				//Go to the page
+				_currentPage=int((event.target as Button).id);
+				//Refresh the pagination controls
+				createPagination();
+			}
+
+			public function refreshDataProvider():void
+			{
+				var current:int=_currentPage - 1;
+				var pageSize:int=DataModel.getInstance().pageSize;
+				var dataTemp:ArrayCollection=new ArrayCollection(_dataProvider.source.slice((current * pageSize), (current * pageSize) + pageSize));
+//				exerciseListDatagrid.rowCount=dataTemp.length;
+//				exerciseListDatagrid.dataProvider=dataTemp;
+				exerciseListDataGroup.dataProvider=dataTemp;
+			}
+
+			private function changeHandler(event:Event):void
+			{
+//				var obj:ExerciseVO=DataGrid(event.target).selectedItem as ExerciseVO;
+				var obj:ExerciseVO=List(event.target).selectedItem as ExerciseVO;
+				
+				new ExerciseEvent(ExerciseEvent.EXERCISE_SELECTED, obj).dispatch();
+				callLater(updateVerticalScroll);
+			}
+
+			public function thumbSet(data:Object):String
+			{
+				return (thumbURL + "/" + data.thumbnailUri);
+			}
+
+			public function updateVerticalScroll():void
+			{
+				FlexGlobals.topLevelApplication.appContainer.verticalScrollPosition=0;
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Binding source="{DataModel.getInstance().availableExercisesRetrieved.getItemAt(DataModel.RECORDING_MODULE)}"
+				destination="handleExercisesRetrieve"/>
+	<fx:Binding source="{DataModel.getInstance().isLoggedIn}"
+				destination="retrieveCustomizedExercises"/>
+
+	<s:List id="exerciseListDataGroup"
+				 width="100%"
+				 minHeight="0"
+				 change="changeHandler(event)"
+				 borderVisible="false"
+				 skinClass="skins.TransparentBgListSkin"
+				 enabled="{!DataModel.getInstance().recordingExercise}"
+				 itemRenderer="modules.exercises.ExerciseItemRenderer"
+				 dataProvider="{_dataProvider}">
+		<s:layout>
+			<s:TileLayout horizontalAlign="justify"
+						  verticalAlign="middle"
+						  columnAlign="justifyUsingWidth"
+						  columnWidth="500"/>
+		</s:layout>
+	</s:List>
+
+	<!--
+		 <mx:DataGrid id="exerciseListDatagrid"
+		 verticalAlign="middle"
+		 width="100%"
+		 height="100%"
+		 dataProvider="{_dataProvider}"
+		 enabled="{!DataModel.getInstance().recordingExercise}"
+		 change="changeHandler(event)"
+		 sortableColumns="false"
+		 draggableColumns="false"
+		 contentBackgroundAlpha="0"
+		 borderStyle="none"
+		 useHandCursor="true">
+		 <mx:columns>
+		 <mx:DataGridColumn headerText="{resourceManager.getString('myResources', 'MESSAGE_EXERCISE_LIST')}"
+		 editable="false">
+		 <mx:itemRenderer>
+		 <fx:Component>
+		 <exercises:ExerciseListItem specificClickListeners="false"/>
+		 </fx:Component>
+		 </mx:itemRenderer>
+		 </mx:DataGridColumn>
+		 </mx:columns>
+		 </mx:DataGrid>-->
+	<s:HGroup id="paginationBox"
+			  horizontalAlign="center"
+			  verticalAlign="middle"
+			  width="100%"
+			  height="100%"/>
+</s:VGroup>

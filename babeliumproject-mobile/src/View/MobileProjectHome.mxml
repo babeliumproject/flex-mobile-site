@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		actionBarVisible="false" backgroundColor="#2485df" backgroundAlpha="0.8" tabBarVisible="false">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.crypto.SHA1;
+			
+			import events.LoginEvent;
+			import events.SetupConnectionEvent;
+			import model.DataModel;
+			
+			import mx.core.UIComponent;
+			import mx.core.mx_internal;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			private var loginMessage:Boolean;
+			import vo.LoginVO;
+			private var mainSO:SharedObject;
+		
+			protected function set onLoginResultListener(value:Boolean):void{
+				if(value) {
+					//isSuccessfullyLogged propietatea true baldin bada
+					
+					navigator.pushView(View.Home,null,null,null);
+					
+				}
+				
+			}
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				var passHash:String=SHA1.hash(text2.text);
+				var user:LoginVO=new LoginVO(text.text, passHash);
+				new SetupConnectionEvent().dispatch();
+				new LoginEvent(LoginEvent.PROCESS_LOGIN, user).dispatch();	
+			}
+			
+			protected function set onLoginError(value1:Boolean):void{
+				if (value1){
+					logintext.visible=value1;
+					logintext.text=DataModel.getInstance().loginErrorMessage;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+
+	<fx:Declarations>
+		<s:SlideViewTransition id="slideTrans1" duration="100"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout>
+			
+		</s:VerticalLayout>
+	</s:layout>
+	<s:HGroup height="20%" width="100%" id="title_babelium"  verticalAlign="bottom">
+		
+		<s:HGroup id="title_layout" width="100%" horizontalAlign="center"  verticalAlign="bottom">
+			<s:Image  width="42" height="42" source="assets/flan_dull.png" />
+			<s:Label  color="white" id="titlelabel" fontFamily="Verdana" fontSize="26" fontWeight="bold"
+					  text="BabeliumProject" height="70%" />
+		</s:HGroup>
+		
+	</s:HGroup>
+	
+	<s:HGroup height="15%" width="100%" id="user_textarea" verticalAlign="bottom" horizontalAlign="center">
+	<s:TextArea  width="75%" height="40" fontSize="17" prompt="User Name"  textAlign="center" id="text" editable="true"/>
+	</s:HGroup>
+	
+	<s:HGroup height="10%" width="100%" id="pass_textarea" verticalAlign="middle" horizontalAlign="center">
+	<s:TextArea  width="75%" height="40" fontSize="17" prompt="Password" displayAsPassword="true"  textAlign="center" id="text2" />
+	</s:HGroup>
+	
+	<s:HGroup height="3%" width="100%" id="logingroup"  horizontalAlign="center" verticalAlign="top" enabled="true" visible="true" >
+		<s:Label id="logintext" width="100%" color="red"  textAlign="center" visible="false" enabled="true" />
+	</s:HGroup>
+	
+	<s:HGroup height="10%" width="100%" id="enter_buttom"  horizontalAlign="center" verticalAlign="top">
+	    <s:Button width="75%" height="43" label="Enter"  chromeColor="#2673c1" click="button1_clickHandler(event)" />
+	</s:HGroup>
+	
+	<s:HGroup height="10%" width="40%" id="register_click" verticalAlign="middle" horizontalAlign="right">
+		<s:Label x="129" y="557"  fontSize="17" text="Register me" textDecoration="underline"/>
+	</s:HGroup>
+	
+	<fx:Binding source="{DataModel.getInstance().isSuccessfullyLogged}" destination="onLoginResultListener"/> 
+	<fx:Binding source="{DataModel.getInstance().logMessage}" destination="onLoginError"/>
+	
+</s:View>

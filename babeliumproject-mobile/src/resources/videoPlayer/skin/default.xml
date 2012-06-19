@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VideoPlayerSkin>
+	<Component name="VideoPlayer">
+		<Property name="bgColor">0x343434</Property>
+		<Property name="borderColor">0x000000</Property>
+		<Property name="videoBgColor">0x000000</Property>
+	</Component>
+	<Component name="VideoPlayerBabelia">
+		<Property name="bgColor">0x343434</Property>
+		<Property name="camBgColor">0x000000</Property>
+		<Property name="borderColor">0x000000</Property>
+		<Property name="videoBgColor">0x000000</Property>
+		<Property name="roleBgColor">0x454545</Property>
+		<Property name="roleBorderColor">0x000000</Property>
+		<Property name="countdownColor">0xFFFFFF</Property>
+	</Component>
+	<Component name="ArrowPanel">
+		<Property name="bgColor">0x343434</Property>
+		<Property name="hlColor">0xFFCB99</Property>
+		<Property name="borderColor">0x000000</Property>
+	</Component>
+	<Component name="LocaleComboBox">
+		<Property name="bgColor">0x343434</Property>
+	</Component>
+	<Component name="RoleTalkingPanel">
+		<Property name="bgColor">0x343434</Property>
+		<Property name="borderColor">0x000000</Property>
+		<Property name="textColor">0xFFB600</Property>
+		<Property name="roleColor">0xFFFFFF</Property>
+		<Property name="barColor">0xFFB600</Property>
+		<Property name="hlColor">0xFFCB99</Property>
+	</Component>
+	<Component name="SubtitleButton">
+		<Property name="bgColor">0x343434</Property>
+	</Component>
+	<Component name="SubtitleTextBox">
+		<Property name="bgColor">0x343434</Property>
+		<Property name="borderColor">0x000000</Property>
+		<Property name="boxColor">0xFFFFFF</Property>
+		<Property name="textColor">0x000000</Property>
+	</Component>
+	<Component name="AudioSlider">
+		<Property name="bgColor">0x343434</Property>
+		<Property name="barBgColor">0x000000</Property>
+		<Property name="barColor">0x008EAD</Property>
+		<Property name="scrubberColor">0xABABAB</Property>
+		<Property name="scrubberBorderColor">0xFFFFFF</Property>
+		<Property name="muteColor">0xFFFFFF</Property>
+		<Property name="muteOverBgColor">0x454545</Property>
+	</Component>
+	<Component name="ElapsedTime">
+		<Property name="bgColor">0x343434</Property>
+		<Property name="textColor">0xFFFFFF</Property>
+	</Component>
+	<Component name="ScrubberBar">
+		<Property name="bgColor">0x343434</Property>
+		<Property name="barBgColor">0x000000</Property>
+		<Property name="barColor">0x008EAD</Property>
+		<Property name="scrubberColor">0xABABAB</Property>
+		<Property name="scrubberBorderColor">0xFFFFFF</Property>
+		<Property name="loadedColor">0xFF0000</Property>
+	</Component>
+	<Component name="PlayButton">
+		<Property name="bgColor">0x343434</Property>
+		<Property name="overBgColor">0x454545</Property>
+		<Property name="iconColor">0xFFFFFF</Property>
+	</Component>
+	<Component name="StopButton">
+		<Property name="bgColor">0x343434</Property>
+		<Property name="overBgColor">0x454545</Property>
+		<Property name="iconColor">0xFFFFFF</Property>
+	</Component>
+	<Component name="SubtitleStartButton">
+		<Property name="bgColor">0x343434</Property>
+		<Property name="overBgColor">0x454545</Property>
+		<Property name="iconColor">0xFFFFFF</Property>
+	</Component>
+	<Component name="SubtitleEndButton">
+		<Property name="bgColor">0x343434</Property>
+		<Property name="overBgColor">0x454545</Property>
+		<Property name="iconColor">0xFFFFFF</Property>
+	</Component>
+	<Component name="SubtitleStartEndButton">
+		<Property name="bgColor">0x343434</Property>
+		<Property name="overBgColor">0x454545</Property>
+		<Property name="iconColor">0xFFFFFF</Property>
+	</Component>
+	<Component name="MicActivityBar">
+		<Property name="bgColor">0x000000</Property>
+		<Property name="barBgColor">0x343434</Property>
+		<Property name="barColor">0xFFFFFF</Property>
+		<Property name="textColor">0x000000</Property>
+	</Component>
+</VideoPlayerSkin> 
