@@ -825,10 +825,11 @@ package modules.videoPlayer
 
                                         break;
 
-                                case PLAY_BOTH_STATE:
-                                        _micActivityBar.visible=false;
-                                        this.updateDisplayList(0,0);
-                                        break;
+								case PLAY_BOTH_STATE:
+									
+									_micActivityBar.visible=false;
+									this.updateDisplayList(0,0);
+									break;
 
                                 default: // PLAY_STATE
 
@@ -1157,8 +1158,8 @@ package modules.videoPlayer
                                  * Resize video image
                                  */
 							
-                                var w:Number=_videoWidth / 2 - 2;
-                                var h:int=w * _video.height / _video.width;
+                                var w:Number=_videoWidth / 2 ;
+								var h:int=Math.ceil(w * 1.6);
 
                                 if (_videoHeight != h) // cause we can call twice to this method
                                         _lastVideoHeight=_videoHeight; // store last value
@@ -1173,7 +1174,7 @@ package modules.videoPlayer
                                 _video.x=Math.floor(w / 2 - (_video.width * scaleC) / 2);
                                 _video.y+=_defaultMargin;
                                 _video.x+=_defaultMargin;
-
+								//width and heigth with the videopanel split
                                 _video.width*=scaleC;
                                 _video.height*=scaleC;
 							
