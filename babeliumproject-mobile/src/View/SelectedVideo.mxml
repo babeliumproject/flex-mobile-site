@@ -331,7 +331,7 @@
 					else
 					{
 				    cueobj.setStartCommand(new StartRecordingSelectedRoleCommand(cueobj, VideoPlayer));
-					cueobj.setEndCommand(new StopRecordingSelectedRoleCommand(VideoPlayer));
+				    cueobj.setEndCommand(new StopRecordingSelectedRoleCommand(VideoPlayer));
 					
 					}
 				}

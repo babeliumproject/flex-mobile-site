@@ -90,6 +90,7 @@ package modules.videoPlayer
                 public static const RECORD_BOTH_STATE:int=3; // 0000 0011
 				public static const UPLOAD_MODE_STATE:int=4; // 0000 0100
 				
+				private var   spliter:Boolean=false;
                 private const SPLIT_FLAG:int=1; // XXXX XXX1
                 private const RECORD_FLAG:int=2; // XXXX XX1X
 				private const UPLOAD_FLAG:int=4
@@ -425,10 +426,11 @@ package modules.videoPlayer
                         }
                         else
 							
-                                playSecondStream();
+                              
+							playSecondStream();
 						
                         // splits video panel into 2 views
-                        splitVideoPanel();
+                       splitVideoPanel();
                 }
 
                 private function netSecurityError(e:SecurityErrorEvent):void
@@ -1090,7 +1092,7 @@ package modules.videoPlayer
                         /*
                          * Resize cam image
                          */
-						trace("scaleen sartu?-------------");
+						
                         scaleCamVideo(w,h);
 
                         updateDisplayList(0, 0); // repaint
@@ -1141,7 +1143,7 @@ package modules.videoPlayer
                         
                         _micImage.y = (_videoHeight - _micImage.height)/2;
                         _micImage.x = _videoWidth - _micImage.width - (_camVideo.width - _micImage.width)/2;
-						trace("hemen ere sartzen da <<<<<<<");
+						
                         
                 }
 
@@ -1149,11 +1151,12 @@ package modules.videoPlayer
                 {
         
                         super.scaleVideo();
-                        if (state & SPLIT_FLAG)
+                        if (state & SPLIT_FLAG )
                         {
                                 /*
                                  * Resize video image
                                  */
+							
                                 var w:Number=_videoWidth / 2 - 2;
                                 var h:int=w * _video.height / _video.width;
 
@@ -1173,6 +1176,7 @@ package modules.videoPlayer
 
                                 _video.width*=scaleC;
                                 _video.height*=scaleC;
+							
                         }
                 }
 
