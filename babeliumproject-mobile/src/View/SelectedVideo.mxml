@@ -266,8 +266,10 @@
 					//Third, save response                          
 					new ResponseEvent(ResponseEvent.SAVE_RESPONSE, responseData).dispatch();
 					
-					recordingEndOptions.includeInLayout=false;
+					
 					recordingEndOptions.visible=false;
+					recording_options.visible=true;
+					recording_button.visible=true;
 					//panelSelectedExercise.includeInLayout=true;
 					//panelSelectedExercise.visible=true;
 					

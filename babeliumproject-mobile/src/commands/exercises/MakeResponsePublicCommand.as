@@ -38,7 +38,6 @@ package commands.exercises
 			else
 			{
 				var userData:UserVO=result as UserVO;
-				trace(userData.name);
 				DataModel.getInstance().loggedUser.creditCount=userData.creditCount;
 				DataModel.getInstance().creditUpdateRetrieved=true;
 			}

@@ -37,6 +37,7 @@ package commands.exercises
 				
 				var responseId:int = data.result.toString();
 				//The response has been successfully saved, so we must store it's id in the model
+				trace("responseId:"+ responseId);
 				DataModel.getInstance().savedResponseId = responseId;
 				DataModel.getInstance().savedResponseRetrieved = !DataModel.getInstance().savedResponseRetrieved;
 				
