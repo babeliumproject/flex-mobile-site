@@ -266,7 +266,7 @@
 					//Third, save response                          
 					new ResponseEvent(ResponseEvent.SAVE_RESPONSE, responseData).dispatch();
 					
-					
+					hideArrows();
 					recordingEndOptions.visible=false;
 					recording_options.visible=true;
 					recording_button.visible=true;
