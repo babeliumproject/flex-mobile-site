@@ -10,13 +10,13 @@ package commands.exercises
 	
 	import model.DataModel;
 	
-	import mx.controls.Alert;
+	//import mx.controls.Alert;
 	import mx.resources.ResourceManager;
 	import mx.rpc.IResponder;
 	import mx.rpc.events.FaultEvent;
 	import mx.utils.ObjectUtil;
 	
-	import view.common.CustomAlert;
+	//import view.common.CustomAlert;
 	
 	import vo.UserVO;
 
@@ -33,11 +33,12 @@ package commands.exercises
 			var result:Object=data.result;
 			if (!result is UserVO)
 			{
-				CustomAlert.error(ResourceManager.getInstance().getString('myResources','ERROR_WHILE_UPDATING_RESPONSE'));
+				//CustomAlert.error(ResourceManager.getInstance().getString('myResources','ERROR_WHILE_UPDATING_RESPONSE'));
 			}
 			else
 			{
 				var userData:UserVO=result as UserVO;
+				trace(userData.name);
 				DataModel.getInstance().loggedUser.creditCount=userData.creditCount;
 				DataModel.getInstance().creditUpdateRetrieved=true;
 			}
@@ -45,7 +46,7 @@ package commands.exercises
 
 		public function fault(info:Object):void {
 			var faultEvent:FaultEvent = FaultEvent(info);
-			CustomAlert.error(ResourceManager.getInstance().getString('myResources','ERROR_WHILE_MAKING_RESPONSE_PUBLIC'));
+		//	CustomAlert.error(ResourceManager.getInstance().getString('myResources','ERROR_WHILE_MAKING_RESPONSE_PUBLIC'));
 			trace(ObjectUtil.toString(info));
 		}
 		

@@ -12,7 +12,10 @@
 	<fx:Script>
 		<![CDATA[
 			import events.RecordingEndOptionEvent;
+			
 			import model.DataModel;
+			
+			import modules.videoPlayer.events.babelia.RecordingEvent;
 		]]>
 	</fx:Script>
 	

@@ -155,7 +155,7 @@ package control {
 			
 			//Response management commands
 			addCommand(ResponseEvent.SAVE_RESPONSE, SaveResponseCommand);
-			//addCommand(ResponseEvent.MAKE_RESPONSE_PUBLIC, MakeResponsePublicCommand);
+			addCommand(ResponseEvent.MAKE_RESPONSE_PUBLIC, MakeResponsePublicCommand);
 			
 			//Roles management commands
 			addCommand(ExerciseRoleEvent.GET_EXERCISE_ROLES, GetExerciseRolesCommand);/*

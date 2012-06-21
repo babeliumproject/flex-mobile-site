@@ -192,8 +192,8 @@ package modules.videoPlayer
 						
                         
                         _micImage.source = DataModel.getInstance().uploadDomain+"resources/images/mic-watermark.png";
-                        _micImage.height = 128;
-                        _micImage.width = 128;
+                        _micImage.height = 70;
+                        _micImage.width = 70;
                         _micImage.alpha = 0.7;
                        // _micImage.autoLoad = true;
                         _micImage.visible = false;
@@ -1142,8 +1142,8 @@ package modules.videoPlayer
                         _camVideo.x+=1;
                         _camVideo.width-=2;
                         
-                        _micImage.y = (_videoHeight - _micImage.height)/2;
-                        _micImage.x = _videoWidth - _micImage.width - (_camVideo.width - _micImage.width)/2;
+                        _micImage.y = (_videoHeight - _micImage.height+80)/2;
+                        _micImage.x = _videoWidth - _micImage.width - (_camVideo.width - _micImage.width)/2+10;
 						
                         
                 }
@@ -1159,7 +1159,7 @@ package modules.videoPlayer
                                  */
 							
                                 var w:Number=_videoWidth / 2 ;
-								var h:int=Math.ceil(w * 1.6);
+								var h:int=Math.ceil(w * 1.3);
 
                                 if (_videoHeight != h) // cause we can call twice to this method
                                         _lastVideoHeight=_videoHeight; // store last value
@@ -1170,13 +1170,13 @@ package modules.videoPlayer
                                 var scaleX:Number=w / _video.width;
                                 var scaleC:Number=scaleX < scaleY ? scaleX : scaleY;
 
-                                _video.y=Math.floor(h / 2 - (_video.height * scaleC) / 2);
+                                _video.y=Math.floor(h / 2.5 - (_video.height * scaleC) / 2);
                                 _video.x=Math.floor(w / 2 - (_video.width * scaleC) / 2);
                                 _video.y+=_defaultMargin;
-                                _video.x+=_defaultMargin;
+                                _video.x+=_defaultMargin+5;
 								//width and heigth with the videopanel split
                                 _video.width*=scaleC;
-                                _video.height*=scaleC;
+                                _video.height*=scaleC+0.2;
 							
                         }
                 }

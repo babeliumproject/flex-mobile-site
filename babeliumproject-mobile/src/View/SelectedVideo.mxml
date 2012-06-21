@@ -254,10 +254,10 @@
 			private function onSaveResponse(e:Event):void
 			{
 				
-				var userCredCount:int=DataModel.getInstance().loggedUser.creditCount;
-				var credsEvalRequest:int=DataModel.getInstance().prefDic['evaluationRequestCredits'];
-				if (userCredCount - credsEvalRequest >= 0)
-				{
+				//var userCredCount:int=DataModel.getInstance().loggedUser.creditCount;
+			//	var credsEvalRequest:int=DataModel.getInstance().prefDic['evaluationRequestCredits'];
+				//if (userCredCount - credsEvalRequest >= 0)
+				//{
 					//This must be changed by some function that takes a snapshot of the Response video
 					var responseThumbnail:String="nothumb.png";
 					var subtitleId:int=_cueManager.currentSubtitle;
@@ -273,11 +273,11 @@
 					
 					
 					resetComponent();
-				}
-				else
-				{
+				//}
+				//else
+				//{
 					//CustomAlert.error(resourceManager.getString('myResources', 'ERROR_INSUFICCIENT_CREDITS'));
-				}
+			//	}
 			}
 			
 			private function showArrows():void
@@ -331,7 +331,7 @@
 					else
 					{
 				    cueobj.setStartCommand(new StartRecordingSelectedRoleCommand(cueobj, VideoPlayer));
-				    cueobj.setEndCommand(new StopRecordingSelectedRoleCommand(VideoPlayer));
+					cueobj.setEndCommand(new StopRecordingSelectedRoleCommand(VideoPlayer));
 					
 					}
 				}

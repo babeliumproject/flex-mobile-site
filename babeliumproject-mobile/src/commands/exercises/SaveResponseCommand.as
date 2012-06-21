@@ -31,8 +31,10 @@ package commands.exercises
 		{
 			//Should be the id of the added response
 			if (!data.result is int){
+				
 				//CustomAlert.error(ResourceManager.getInstance().getString('myResources','ERROR_WHILE_SAVING_RESPONSE'));
 			} else {
+				
 				var responseId:int = data.result.toString();
 				//The response has been successfully saved, so we must store it's id in the model
 				DataModel.getInstance().savedResponseId = responseId;
