@@ -14,98 +14,104 @@
 							paddingLeft="8"
 							paddingRight="8"/>
 	</s:layout>
- <s:HGroup width="100%" horizontalAlign="center">
-	 
+	<s:HGroup width="100%"
+			  horizontalAlign="center">
 
-	<s:Group width="120"
-			 height="90">
-		<s:Image id="thumbnail"
-				  source="{getImageSource(data as ExerciseVO)}"
-				  width="120"
-				  height="90"
-				  toolTip="{data.title}"/>
-		<s:Label text="{_timeFormatter.format(data.duration)}"
-				 styleName="videoDurationLabel"
-				 x="88"
-				 y="2" backgroundColor="black"/>
-	</s:Group>
 
-	<s:VGroup width="320"
-			  horizontalAlign="left"
-			  gap="2">
-		<s:Label id="title"
-				 text="{data.title}"
-				 width="320"
-				 fontSize="17"
-				  fontWeight="bold"/>
-		<s:Line width="320"
-				alpha="0.5">
-			<s:stroke>
-				<mx:SolidColorStroke weight="2"
-									 color="#aaaaaa"/>
-			</s:stroke>
-		</s:Line>
-		<s:HGroup gap="20"
-				  verticalAlign="middle">
-			<s:HGroup gap="2"
+		<s:Group width="120"
+				 height="90">
+			<s:Image id="thumbnail"
+					 source="{getImageSource(data as ExerciseVO)}"
+					 width="120"
+					 height="90"
+					 toolTip="{data.title}"/>
+			<s:Label text="{_timeFormatter.format(data.duration)}"
+					 styleName="videoDurationLabel"
+					 x="88"
+					 y="2"
+					 backgroundColor="black"/>
+		</s:Group>
+
+		<s:VGroup width="320"
+				  horizontalAlign="left"
+				  gap="2">
+			<s:Label id="title"
+					 text="{data.title}"
+					 width="320"
+					 fontSize="17"
+					 fontWeight="bold"/>
+			<s:Line width="320"
+					alpha="0.5">
+				<s:stroke>
+					<mx:SolidColorStroke weight="2"
+										 color="#aaaaaa"/>
+				</s:stroke>
+			</s:Line>
+			<s:HGroup gap="20"
 					  verticalAlign="middle">
-				<s:Image width="16"
-						  height="16"
-						  toolTip="{exerciseLanguage.source}"
-						  source="{getFlagSource(data as ExerciseVO)}"
-						  id="exerciseLanguage"/>
-				<s:Label text="{getLevelCorrespondence(data.avgDifficulty)}"
+				<s:HGroup gap="2"
+						  verticalAlign="middle">
+					<s:Image width="16"
+							 height="16"
+							 toolTip="{exerciseLanguage.source}"
+							 source="{getFlagSource(data as ExerciseVO)}"
+							 id="exerciseLanguage"/>
+					<s:Label text="{getLevelCorrespondence(data.avgDifficulty)}"
+							 styleName="boldYellowLabel"/>
+				</s:HGroup>
+				<hulstkamp:AhFxRatingComponent rating="{data.avgRating}"
+											   enabled="false"
+											   skinClass="com.hulstkamp.AhRatingComponentStarSkin"
+											   scaleX="1.2"
+											   scaleY="1.2"/>
+				<s:Label text="{dateFormatter.format(data.addingDate)}"
 						 styleName="boldYellowLabel"/>
 			</s:HGroup>
-			<hulstkamp:AhFxRatingComponent rating="{data.avgRating}"
-										   enabled="false"
-										   skinClass="com.hulstkamp.AhRatingComponentStarSkin"
-										   scaleX="1.2"
-										   scaleY="1.2"/>
-			<s:Label text="{dateFormatter.format(data.addingDate)}"
-					 styleName="boldYellowLabel"/>
-		</s:HGroup>
 
 
-		<s:Label text="{data.description}"
-				 width="320"
-				 maxDisplayedLines="3"
-				 toolTip="{data.description}"
-				  fontSize="16"/>
-		<s:HGroup horizontalAlign="right"
-				  verticalAlign="middle"
-				  width="320">
-			<s:Label text="USER:" fontSize="12" fontWeight="bold"/>
-			<skins:IconButton label="{data.userName}"
-							  styleName="commonLinkButton"/>
-		</s:HGroup>
-		<s:HGroup>
-			<s:Label text="TAGS:"  fontSize="12" fontWeight="bold"/>
-			<s:HGroup id="tagRow"/>
-		</s:HGroup>
-		<s:HGroup verticalAlign="middle"
-				  width="100%">
-			<s:Image id="license"
-					  source="{getLicenseSource(data as ExerciseVO)}"
-					  click="licenseClickHandler(event)"
-					  toolTip="{_licenseData.tooltip}"
-					  width="80"
-					  height="15"
-					  useHandCursor="true"
-					  buttonMode="true"/>
-			<!--
-			<s:Label text="{resourceManager.getString('myResources','AUTHOR_PROVIDED_BY')}"
-					 visible="{data.reference}"/>-->
-			<skins:IconButton id="referenceUrl"
-							  width="240"
-							  label="{data.reference}"
-							  click="referenceClickHandler(event)"
-							  styleName="commonLinkButton"
-							  enabled="{checkExternalUrl(data.reference)}"/>
-		</s:HGroup>
+			<s:Label text="{data.description}"
+					 width="320"
+					 maxDisplayedLines="3"
+					 toolTip="{data.description}"
+					 fontSize="16"/>
+			<s:HGroup horizontalAlign="right"
+					  verticalAlign="middle"
+					  width="320">
+				<s:Label text="USER:"
+						 fontSize="12"
+						 fontWeight="bold"/>
+				<skins:IconButton label="{data.userName}"
+								  styleName="commonLinkButton"/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text="TAGS:"
+						 fontSize="12"
+						 fontWeight="bold"/>
+				<s:HGroup id="tagRow"/>
+			</s:HGroup>
+			<s:HGroup verticalAlign="middle"
+					  width="100%">
+				<s:Image id="license"
+						 source="{getLicenseSource(data as ExerciseVO)}"
+						 click="licenseClickHandler(event)"
+						 toolTip="{_licenseData.tooltip}"
+						 width="80"
+						 height="15"
+						 useHandCursor="true"
+						 buttonMode="true"/>
+				<!--
+				<s:Label text="{resourceManager.getString('myResources','AUTHOR_PROVIDED_BY')}"
+						 visible="{data.reference}"/>-->
+				<skins:IconButton id="referenceUrl"
+								  width="240"
+								  label="{data.reference}"
+								  click="referenceClickHandler(event)"
+								  styleName="commonLinkButton"
+								  enabled="{checkExternalUrl(data.reference)}"/>
+			</s:HGroup>
 
-	</s:VGroup>
- </s:HGroup>
+		</s:VGroup>
+	</s:HGroup>
 
 	<fx:Declarations>
 		<mx:DateFormatter id="dateFormatter"
@@ -116,21 +122,20 @@
 	<fx:Script>
 		<![CDATA[
 			//import control.CuePointManager;
-			
+
 			//import events.ExerciseEvent;
 			//import events.ExerciseRoleEvent;
 			//import events.SubtitleEvent;
-			
-			import model.DataModel;
-			
-			//import mx.controls.Text;
-			import mx.formatters.NumberBaseRoundType;
-			import mx.formatters.NumberFormatter;
-			import mx.formatters.SwitchSymbolFormatter;
-			
+
 			import View.common.LicenseResource;
 			import View.common.LocaleFlagResource;
 			import View.common.TimeFormatter;
+			
+			import model.DataModel;
+			
+			import mx.formatters.NumberBaseRoundType;
+			import mx.formatters.NumberFormatter;
+			import mx.formatters.SwitchSymbolFormatter;
 			
 			import vo.ExerciseRoleVO;
 			import vo.ExerciseVO;
@@ -147,13 +152,13 @@
 			private var _licenseData:LicenseVO=new LicenseVO();
 
 			[Bindable]
-			private var _timeFormatter:TimeFormatter= new TimeFormatter();
+			private var _timeFormatter:TimeFormatter=new TimeFormatter();
 
 			public function completeHandler():void
 			{
 				_data=data;
 				_creationComplete=true;
-			
+
 				//setupReferenceComponent();
 			}
 
@@ -222,6 +227,9 @@
 					url=DataModel.getInstance().thumbURL + "/" + temp.thumbnailUri;
 				else
 					url=temp.thumbnailUri;
+				//thumbnail url 4 babeliums new servers config.
+				//var fragment:String = (temp.thumbnailUri != "nothumb.png") ? temp.name+"/default.jpg" : "nothumb.png";
+				//var url:String=DataModel.getInstance().thumbURL + "/" + fragment;
 				return url;
 			}
 
