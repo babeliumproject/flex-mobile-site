@@ -127,8 +127,8 @@ package control {
 			addCommand(VideoSliceEvent.CREATE_SLICE, CreateSliceCommand);
 
 			//Exercise management commands
-			addCommand(ExerciseEvent.GET_EXERCISES, GetExercisesCommand);
-			addCommand(ExerciseEvent.GET_RECORDABLE_EXERCISES, GetRecordableExercisesCommand);*/
+			addCommand(ExerciseEvent.GET_EXERCISES, GetExercisesCommand);*/
+			addCommand(ExerciseEvent.GET_RECORDABLE_EXERCISES, GetRecordableExercisesCommand);
 			addCommand(ExerciseEvent.GET_EXERCISE_LOCALES, GetExerciseLocalesCommand);/*
 			addCommand(ExerciseEvent.WATCH_EXERCISE, WatchExerciseCommand);
 			addCommand(ExerciseEvent.EXERCISE_SELECTED, ExerciseSelectedCommand);*/

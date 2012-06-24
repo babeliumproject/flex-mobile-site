@@ -1,11 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		xmlns:s="library://ns.adobe.com/flex/spark"
-		xmlns:utils="utils.*" skinClass="skins.CustomViewBackground">
+		xmlns:utils="utils.*" skinClass="skins.CustomViewBackground" creationComplete="view1_creationCompleteHandler(event)">
 	
-	<utils:search width="100%" />
 	
+	
+	<fx:Script>
+		<![CDATA[
+			import events.ExerciseEvent;
+			
+			import model.DataModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			import spark.components.Button;
+			
+			import vo.ExerciseVO;
+			
+			[Bindable]
+			private var _dataProvider:ArrayCollection;
+			
+			
+			protected function view1_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+				new ExerciseEvent(ExerciseEvent.GET_RECORDABLE_EXERCISES).dispatch()
+				// TODO Auto-generated method stub
+				
+			}
+
+			private function changeHandler(event:Event):void
+			{
+				//				var obj:ExerciseVO=DataGrid(event.target).selectedItem as ExerciseVO;
+				var obj:ExerciseVO=List(event.target).selectedItem as ExerciseVO;
+				
+				if (obj !=null)
+				{
+					//call startconetion with red5
+					navigator.pushView(View.SelectedVideo,obj,null,slideTrans);
+				}
+				else
+				{
+					//we can't add subtitules in mobile devices...
+				}
+				List(event.target).selectedItem = null;
+				
+				//BabeliaBrowserManager.getInstance().parseURL(null);
+			}
+				
+			
+			
+			public function set handleExercisesRetrieve(value:Boolean):void
+			{
+				
+					//exerciseListDatagrid.rowCount=DataModel.getInstance().availableRecordableExercises.length;
+					_dataProvider=DataModel.getInstance().availableRecordableExercises;
+
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Binding source="{DataModel.getInstance().availableExercisesRetrieved.getItemAt(DataModel.RECORDING_MODULE)}"
+				destination="handleExercisesRetrieve"/>
+
+	
+	<s:VGroup width="100%" height="100%">
+		
+		<utils:search width="100%"/>
+		<s:VGroup horizontalAlign="center" width="100%" paddingTop="16" paddingBottom="16">
+			<s:Label text="Exercises"
+					 styleName="sectionTitleLabel"
+					 id="userProfileTitleLabel"/>
+			<s:Line width="{userProfileTitleLabel.width}">
+				<s:stroke>
+					<s:SolidColorStroke weight="3"
+										color="{userProfileTitleLabel.getStyle('color')}"/>
+				</s:stroke>
+			</s:Line>
+		</s:VGroup>
+		<s:List id="exerciseListDataGroup"
+				width="100%"
+			    height="100%"
+				minHeight="0"
+				change="changeHandler(event)"
+			    enabled="true"
+			    pageScrollingEnabled="true"
+			    skinClass="skins.TransparentBgListSkin"
+				itemRenderer="modules.exercises.ExerciseItemRenderer"
+				dataProvider="{_dataProvider}">
+			<s:layout>
+				<s:TileLayout horizontalAlign="justify"
+							  verticalAlign="middle"
+							  columnAlign="justifyUsingWidth"
+							  columnWidth="500"/>
+			</s:layout>
+		</s:List>
+	</s:VGroup>
 	<fx:Declarations>
+		<s:SlideViewTransition id="slideTrans" duration="800"/>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
 </s:View>

@@ -8,13 +8,13 @@ package commands.exercises
 	import model.DataModel;
 	
 	import mx.collections.ArrayCollection;
-	import mx.controls.Alert;
+	//import mx.controls.Alert;
 	import mx.resources.ResourceManager;
 	import mx.rpc.IResponder;
 	import mx.utils.ArrayUtil;
 	import mx.utils.ObjectUtil;
 	
-	import view.common.CustomAlert;
+//	import view.common.CustomAlert;
 	
 	import vo.ExerciseVO;
 	
@@ -48,7 +48,7 @@ package commands.exercises
 		
 		public function fault(info:Object):void
 		{
-			CustomAlert.error(ResourceManager.getInstance().getString('myResources','ERROR_WHILE_RETRIEVING_EXERCISES'));
+			//CustomAlert.error(ResourceManager.getInstance().getString('myResources','ERROR_WHILE_RETRIEVING_EXERCISES'));
 			trace(ObjectUtil.toString(info));
 		}
 	}
