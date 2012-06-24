@@ -92,8 +92,9 @@
 			//get selected exercise data
 			protected function view1_viewActivateHandler(event:ViewNavigatorEvent):void
 			{
+				//view set to landscape
+				stage.setAspectRatio(StageAspectRatio.LANDSCAPE); 
 				//onchangeview stop video
-				
 				var exer:ExerciseVO;
 				if (data != null)
 				{
@@ -273,7 +274,9 @@
 				hideArrows();
 				recordingEndOptions.visible=false;
 				recording_options.visible=true;
+				bigarren.visible=true;
 				recording_button.visible=true;
+				
 				//panelSelectedExercise.includeInLayout=true;
 				//panelSelectedExercise.visible=true;
 
@@ -360,8 +363,9 @@
 				{
 
 					recording_options.visible=true;
+					bigarren.visible=true;
 					recording_button.visible=true;
-
+					
 
 						//panelSelectedExercise.visible=true;
 						//panelSelectedExercise.includeInLayout=true;
@@ -371,8 +375,8 @@
 				else
 				{
 					recording_options.visible=true;
+					bigarren.visible=true;
 					recording_button.visible=true;
-
 
 						//guestEditWarningBox.visible=true;
 						//guestEditWarningBox.includeInLayout=true;
@@ -570,8 +574,11 @@
 			private function onStartRecordingClicked(e:MouseEvent):void
 			{
 				recording_options.visible=false;
+				recording_options.includeInLayout=false;
 				recording_button.visible=false;
-
+				recording_button.includeInLayout=false;
+				bigarren.visible=false;
+				bigarren.includeInLayout=false;
 				recordingEndOptions.visible=true;
 				// Commands with selected role
 
@@ -599,6 +606,7 @@
 			protected function view1_viewDeactivateHandler(event:ViewNavigatorEvent):void
 			{
 				trace("viewDeactivate");
+				
 			}
 			
 			protected function view1_removingHandler(event:ViewNavigatorEvent):void
@@ -633,17 +641,8 @@
 	<s:VGroup width="100%"
 			  height="100%">
 		<utils:search width="100%"/>
-		<s:VGroup width="100%"
-				  horizontalAlign="center"
-				  paddingTop="16">
-			<s:Label text="{EXERCISE_NAME}"
-					 styleName="sectionTitleLabel"
-					 id="selectedVideoName"/>
-		</s:VGroup>
-
-		<s:HGroup horizontalAlign="center"
-				  width="100%"
-				  paddingTop="8">
+		<s:HGroup horizontalAlign="left"
+				  width="100%" paddingLeft="16" paddingTop="6" minHeight="0" minWidth="0">
 
 			<videoPlayer1:VideoPlayerBabelia id="VideoPlayer"
 											 skin="white"
@@ -651,71 +650,85 @@
 											 subtitles="true"
 											 autoPlay="false"
 											 autoScale="true"
-											 width="420"
-											 height="320"
+											 width="450"
+											 height="240"
 											 streamSource="{DataModel.getInstance().streamingResourcesPath}"
 											 controlsEnabled="true"/>
-		</s:HGroup>
-		<s:VGroup id="recording_options"
-				  width="{VideoPlayer.width}"
-				  height="100%"
-				  paddingLeft="{VideoPlayer.x}"
-				  paddingTop="16"
-				  minHeight="0"
-				  minWidth="0">
-
-
-			<s:Label text="RECORDING SETTINGS"
-					 fontWeight="bold"
-					 fontSize="15"
-					 paddingBottom="10"/>
-
-			<s:HGroup width="100%"
-					  height="78">
-				<s:VGroup width="100%">
-					<s:HGroup verticalAlign="middle"
-							  paddingBottom="10">
-						<s:Label text="Choose a role"
-								 fontSize="15"/>
-						<s:RadioButton id="role1"
-									   fontSize="15"
-									   groupName="Role"
-									   selected="true"
-									   scaleX="0.7"
-									   scaleY="0.7"/>
-						<s:RadioButton id="role2"
-									   fontSize="14"
-									   groupName="Role"
-									   scaleX="0.7"
-									   scaleY="0.7"/>
-					</s:HGroup>
-
-					<s:HGroup verticalAlign="middle">
-						<s:Label fontSize="14"
-								 text="Choose recording method"/>
-						<s:RadioButton id="micOnly"
-									   label="Microphone "
-									   fontSize="15"
-									   groupName="recMode"
-									   selected="true"
-									   scaleX="0.7"
-									   scaleY="0.7"/>
-						<s:RadioButton id="micAndCam"
-									   label="Video"
-									   fontSize="14"
-									   groupName="recMode"
-									   scaleX="0.7"
-									   scaleY="0.7"/>
-					</s:HGroup>
-				</s:VGroup>
-
-				<s:VGroup verticalAlign="bottom"
+			
+			<s:VGroup width="100%"
+					  horizontalAlign="center"
+					  paddingTop="16" minHeight="0" minWidth="0">
+				<s:Label text="{EXERCISE_NAME}"
+						 styleName="sectionTitleLabel"
+						 id="selectedVideoName"/>
+				
+				<s:VGroup  id="bigarren"
+						  height="100%"
 						  width="100%"
+						  paddingTop="10"
+						  paddingLeft="16"
+						  minHeight="0"
+						  minWidth="0">
+					
+					
+					<s:Label text="RECORDING SETTINGS"
+							 fontWeight="bold"
+							 fontSize="15"
+							 paddingBottom="10"/>
+			</s:VGroup>
+				
+				<s:HGroup width="100%"
+						  height="78" paddingLeft="16" minHeight="0" minWidth="0" id="recording_options">
+					<s:VGroup width="100%">
+						<s:Label text="Choose a role :"
+								 fontSize="15"/>
+						<s:HGroup verticalAlign="middle"
+								  paddingBottom="10" minHeight="0" minWidth="0">
+							<s:RadioButton id="role1"
+										   fontSize="18"
+										   groupName="Role"
+										   selected="true"
+										   scaleX="0.7"
+										   scaleY="0.7"/>
+							<s:RadioButton id="role2"
+										   fontSize="18"
+										   groupName="Role"
+										   scaleX="0.7"
+										   scaleY="0.7"/>
+							
+						</s:HGroup>
+						
+						<s:Label fontSize="15"
+								 text="Choose recording method :"/>
+						<s:HGroup verticalAlign="middle" minHeight="0" minWidth="0">
+							
+							<s:RadioButton id="micOnly"
+										   label="Microphone "
+										   fontSize="18"
+										   groupName="recMode"
+										   selected="true"
+										   scaleX="0.7"
+										   scaleY="0.7"/>
+							<s:RadioButton id="micAndCam"
+										   label="Video"
+										   fontSize="18"
+										   groupName="recMode"
+										   scaleX="0.7"
+										   scaleY="0.7"/>
+						</s:HGroup>
+						
+						<videoPlayerControls:ExerciseInfoBox id="ratingShareReport"
+															 width="100%"/>
+					</s:VGroup>
+					
+				</s:HGroup>
+				<s:VGroup  verticalAlign="top"
+						  width="90%"
 						  height="94"
-						  id="recording_button">
-
-
-
+						  id="recording_button" horizontalAlign="right">
+					
+					
+					
 					<skins:IconButton id="startRecordingButton"
 									  enabled="{_rolesReady &amp;&amp; _localesReady &amp;&amp; _cueManagerReady}"
 									  icon="{DataModel.getInstance().recordingExercise ? abortIcon : recIcon}"
@@ -723,33 +736,19 @@
 									  toolTip="{DataModel.getInstance().recordingExercise ?  'ABORT_RECORDING' : 'BUTTON_START_RECORDING' }"
 									  click="onStartRecordingClicked(event)"/>
 				</s:VGroup>
+				<s:VGroup width="100%" paddingTop="16">
+					<exercises:RecordingEndOptions id="recordingEndOptions"
+												   visible="false"
+												   y="471"/>
+				</s:VGroup>
 
-			</s:HGroup>
-
-
-
-			<videoPlayerControls:ExerciseInfoBox id="ratingShareReport"
-												 width="{VideoPlayer.width}"/>
-
-
-
+				</s:VGroup>
+			
+		</s:HGroup>
+		
 		</s:VGroup>
 
-		<s:VGroup width="100%"
-				  paddingLeft="{VideoPlayer.x}">
-
-
-			<exercises:RecordingEndOptions id="recordingEndOptions"
-										   visible="false"
-										   width="{VideoPlayer.width}"
-										   y="471"/>
-
-		</s:VGroup>
-
-	</s:VGroup>
-
-
-
+		
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>

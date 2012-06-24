@@ -115,19 +115,18 @@
 
 	<s:HGroup id="ratingAndReportBox"
 			  width="100%">
-		<s:HGroup 
-				  paddingLeft="4">
+		<s:VGroup paddingLeft="4">
 			<hulstkamp:AhFxRatingComponent id="rating"
 										   rating="{_exerciseRating}"
 										   click="ratingClickHandler(event)"
 										   skinClass="com.hulstkamp.AhRatingComponentStarSkin"
-										   scaleX="1.5"
-										   scaleY="1.5"
+										   scaleX="1.7"
+										   scaleY="1.7"
 										    enabled="{DataModel.getInstance().isLoggedIn &amp;&amp; !DataModel.getInstance().userRatedExercise &amp;&amp; _dataAvailable  }"/>
 			<s:Label id="exDescription"
-					 fontSize="13"
-					 width="100%" verticalAlign="bottom" height="90%" paddingLeft="16"/>
-		</s:HGroup>
+					 fontSize="15"
+					 width="100%" verticalAlign="bottom" height="90%" paddingTop="10"/>
+		</s:VGroup>
 		
 	</s:HGroup>
 	

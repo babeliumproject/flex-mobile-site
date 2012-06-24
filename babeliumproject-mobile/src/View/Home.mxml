@@ -4,6 +4,7 @@
 		xmlns:utils="utils.*" skinClass="skins.CustomViewBackground">
 	
 	<fx:Declarations>
+		<s:SlideViewTransition id="slideTrans" duration="800"/>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
 	
@@ -46,7 +47,7 @@
 				if (obj.isSubtitled)
 				{
 					//call startconetion with red5
-				navigator.pushView(View.SelectedVideo,obj);
+				navigator.pushView(View.SelectedVideo,obj,null,slideTrans);
 				}
 				else
 				{
@@ -64,7 +65,9 @@
 	<fx:Binding source="{DataModel.getInstance().signedInLatestUploadedVideosRetrieved}"
 				destination="handleSignedInLatestUploadedVideos"/>
 	
+
 	<s:VGroup width="100%" height="100%">
+		
 		<utils:search width="100%"/>
 		<s:VGroup horizontalAlign="center" width="100%" paddingTop="16" paddingBottom="16">
 			<s:Label text="LatestUploadVideos"
@@ -77,13 +80,11 @@
 				</s:stroke>
 			</s:Line>
 		</s:VGroup>
-		
 		<s:List id="latestUploadedVideosDataGroup"
-				top="0" bottom="0" left="0" right="0"
-				width="100%" 
-				change="latestUploadedVideosDataGroup_changeHandler(event)"
+			   pageScrollingEnabled="true"
+				width="100%" height="100%"
 				skinClass="skins.TransparentBgListSkin"
-				height="100%"
+				change="latestUploadedVideosDataGroup_changeHandler(event)"
 				dataProvider="{_dataProvider}"
 				itemRenderer="utils.ExerciseItemRenderer">
 			<s:layout>
@@ -91,12 +92,6 @@
 			</s:layout>
 		</s:List>
 	</s:VGroup>
-	
-		
-	
-	
-	
-	
 	
 	
 </s:View>
