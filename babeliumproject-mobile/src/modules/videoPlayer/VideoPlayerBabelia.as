@@ -869,9 +869,9 @@ package modules.videoPlayer
                                 _countdownTxt.visible=false;
                                 _video.visible=true;
 
-                                if (state == RECORD_BOTH_STATE){
+                                if (state == RECORD_BOTH_STATE || state == UPLOAD_MODE_STATE){
                                         _camVideo.visible=true;
-                                        _micImage.visible=true;
+                                       // _micImage.visible=true;
                                 }
 
                                 // Reset countdown timer
@@ -910,35 +910,26 @@ package modules.videoPlayer
 
 				
 				public function getFrontCamera():Camera
-
 				{
 					//First check if the device supports a camera
 					if (Camera.isSupported == false)
 					{
 						return null;
 					}
-			
 					var numCameras:int = Camera.names.length;
-			
 					var frontCam:Camera;
-				
-					//Loop through all the available cameras on the device
+					//Loop through all the available cameras on the device(back and front)
 			
 					for (var i:int = 0; i < numCameras; i++)
 			
 					{
 						frontCam = Camera.getCamera(Camera.names[i]);
-	
 						//If the camera.position property matches the constant CameraPosition.FRONT we have found the front camera
-				
 						if (frontCam.position == CameraPosition.FRONT)
-						
 						{
 							break;
 						}
-					
 						//Make sure the camera object is set to null
-					
 						frontCam = null;
 					}
 				
@@ -951,17 +942,15 @@ package modules.videoPlayer
                 
                         if (state == RECORD_BOTH_STATE)
                         {
-							import flash.media.Camera;
-							import flash.media.Video;
+							
 							var _camera:Camera = getFrontCamera();
-							if (_camera != null) {
-								_camera.setMode(stage.stageWidth, stage.stageHeight, 15, false);
-								var video:Video = new Video(_camera.width, _camera.height);
-								video.x = 100;
-								video.y = 100;
-								video.attachCamera(_camera);
-								addChild(video);
-							}
+						
+								_camera.setMode(DataModel.getInstance().cameraWidth, DataModel.getInstance().cameraHeight, 15, false);
+								var _camVideo:Video = new Video(_camera.width, _camera.height);
+								//video.x = 100;
+								//video.y = 100;
+								_camVideo.attachCamera(_camera);
+								addChild(_camVideo);
                                // _camera=DataModel.getInstance().camera;
                                // _camera.setMode(DataModel.getInstance().cameraWidth, DataModel.getInstance().cameraHeight, 15, false);
                         }
@@ -1035,10 +1024,10 @@ package modules.videoPlayer
                         {
                                 // Attach Camera
                                 _camVideo.attachCamera(_camera);
-                                _camVideo.smoothing=true;
+                               // _camVideo.smoothing=true;
 
-                               // splitVideoPanel();
-                                _camVideo.visible=false;
+                                splitVideoPanel();
+                                _camVideo.visible=true;
                                 _micImage.visible=false;
                         }
 
