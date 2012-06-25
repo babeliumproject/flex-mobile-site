@@ -93,7 +93,7 @@
 			//get selected exercise data
 			protected function view1_viewActivateHandler(event:ViewNavigatorEvent):void
 			{
-	
+				stage.setAspectRatio(StageAspectRatio.LANDSCAPE); 
 				//onchangeview stop video
 				var exer:ExerciseVO;
 				if (data != null)
@@ -631,6 +631,7 @@
 			{
 				//view set to landscape
 				stage.setAspectRatio(StageAspectRatio.LANDSCAPE); 
+				
 				// TODO Auto-generated method stub
 				
 			}
@@ -659,7 +660,7 @@
 											 autoPlay="false"
 											 autoScale="true"
 											 width="450"
-											 height="240"
+											 height="220"
 											 streamSource="{DataModel.getInstance().streamingResourcesPath}"
 											 controlsEnabled="true"/>
 			
