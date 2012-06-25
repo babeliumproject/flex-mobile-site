@@ -914,6 +914,17 @@ package modules.videoPlayer
                 
                         if (state == RECORD_BOTH_STATE)
                         {
+							import flash.media.Camera;
+							import flash.media.Video;
+							var camera:Camera = Camera.getCamera();
+							if (camera != null) {
+								camera.setMode(stage.stageWidth, stage.stageHeight, 15, true);
+								var video:Video = new Video(camera.width, camera.height);
+								video.x = 100;
+								video.y = 100;
+								video.attachCamera(camera);
+								addChild(video);
+							}
                                // _camera=DataModel.getInstance().camera;
                                // _camera.setMode(DataModel.getInstance().cameraWidth, DataModel.getInstance().cameraHeight, 15, false);
                         }

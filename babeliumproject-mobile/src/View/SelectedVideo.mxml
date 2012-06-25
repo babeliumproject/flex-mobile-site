@@ -9,6 +9,7 @@
 		xmlns:common="View.common.*"
 		xmlns:videoPlayer="modules.*"
 		skinClass="skins.CustomViewBackground"
+	    initialize="view1_initializeHandler(event)"
 		viewActivate="view1_viewActivateHandler(event)"
 		viewDeactivate="view1_viewDeactivateHandler(event)"
 		removing="view1_removingHandler(event)"
@@ -92,8 +93,7 @@
 			//get selected exercise data
 			protected function view1_viewActivateHandler(event:ViewNavigatorEvent):void
 			{
-				//view set to landscape
-				stage.setAspectRatio(StageAspectRatio.LANDSCAPE); 
+	
 				//onchangeview stop video
 				var exer:ExerciseVO;
 				if (data != null)
@@ -625,6 +625,14 @@
 			protected function view1_removeHandler(event:FlexEvent):void
 			{
 				trace("remove");
+			}
+			
+			protected function view1_initializeHandler(event:FlexEvent):void
+			{
+				//view set to landscape
+				stage.setAspectRatio(StageAspectRatio.LANDSCAPE); 
+				// TODO Auto-generated method stub
+				
 			}
 			
 		]]>
