@@ -108,7 +108,6 @@ package modules.videoPlayer
                 private var _mic:Microphone;
                 private var _volumeTransform:SoundTransform=new SoundTransform();
 
-                private var _camera:Camera;
                 private var _camVideo:Video;
                 private var _defaultCamWidth:Number=DataModel.getInstance().cameraWidth;
                 private var _defaultCamHeight:Number=DataModel.getInstance().cameraHeight;
@@ -143,7 +142,7 @@ package modules.videoPlayer
                 
                 private var _micImage:Image;
                 private var _overlayButton:Button;
-
+				private var _camera:Camera = getFrontCamera();
 
                 /**
                  * CONSTRUCTOR
@@ -878,7 +877,7 @@ package modules.videoPlayer
                                 _countdownTxt.text="5";
                                 _countdown.stop();
                                 _countdown.reset();
-                                startRecording();
+								startRecording();
                         }
                         else if(state != PLAY_STATE)
 						
@@ -942,39 +941,31 @@ package modules.videoPlayer
                 
                         if (state == RECORD_BOTH_STATE)
                         {
-							
-							var _camera:Camera = getFrontCamera();
-						
 								_camera.setMode(DataModel.getInstance().cameraWidth, DataModel.getInstance().cameraHeight, 15, false);
-								var _camVideo:Video = new Video(_camera.width, _camera.height);
+								 _camVideo = new Video(_camera.width, _camera.height);
 								//video.x = 100;
 								//video.y = 100;
 								_camVideo.attachCamera(_camera);
+								_camVideo.x= 260;
+								_camVideo.y=150;
 								addChild(_camVideo);
                                // _camera=DataModel.getInstance().camera;
                                // _camera.setMode(DataModel.getInstance().cameraWidth, DataModel.getInstance().cameraHeight, 15, false);
                         }
-						
-						
 							// continue on
-					
-						
 						_mic.gain = 100;
 						_mic.rate = 22;
-						_mic.setSilenceLevel(0, 60000000);
+						_mic.setSilenceLevel(0, 6000000);
 						_mic.setUseEchoSuppression(true);
 						_mic.setLoopBack(true);
 						_micCamEnabled=true;
-                      
-                        
                        // _mic.setSilenceLevel(0, 60000000);
-
                         _video.visible=false;
                         //_micImage.visible=false;
                         _countdownTxt.visible=true;
                         prepareRecording();
 						_overlayButton.visible=false;
-                        startCountdown();
+						startCountdown();
 						
                 }
 
@@ -1045,7 +1036,7 @@ package modules.videoPlayer
 							_camVideo.attachCamera(_camera);
 							_camVideo.smoothing=true;
 							
-						    splitVideoPanel();
+						   // splitVideoPanel();
 							_camVideo.visible=false;
 							_micImage.visible=false;
 							_outNs=new NetStream(_nc);
@@ -1097,46 +1088,43 @@ package modules.videoPlayer
                 /**
                  * Split video panel into 2 views
                  */
-                private function splitVideoPanel():void
-                {
-                
-                        if (!(state & SPLIT_FLAG))
-                                return; // security check
-
-                        /*
-                         * Resize video image
-                         */
-                        var w:Number=_videoWidth / 2 - 2;
-                        var h:int=w * _video.height / _video.width;
-
-                        if (_videoHeight != h) // cause we can call twice to this method
-                                _lastVideoHeight=_videoHeight; // store last value
-
-                        _videoHeight=h;
-
-                        var scaleY:Number=h / _video.height;
-                        var scaleX:Number=w / _video.width;
-                        var scaleC:Number=scaleX < scaleY ? scaleX : scaleY;
-
-                        _video.y=Math.floor(h / 2 - (_video.height * scaleC) / 2);
-                        _video.x=Math.floor(w / 2 - (_video.width * scaleC) / 2);
-                        _video.y+=_defaultMargin;
-                        _video.x+=_defaultMargin;
-
-                        _video.width*=scaleC;
-                        _video.height*=scaleC;
-                        
-
-                        /*
-                         * Resize cam image
-                         */
-						
-                        scaleCamVideo(w,h);
-
-                        updateDisplayList(0, 0); // repaint
-
-                        //trace("The video panel has been splitted");
-                }
+				private function splitVideoPanel():void
+				{
+					//The stage should be splitted only when the right state is set
+					if (!(state & SPLIT_FLAG))
+						return;
+					
+					var w:Number=_videoWidth / 2 ;
+					var h:int=Math.ceil(w * 0.75);//_video.height / _video.width);
+					
+					if (_videoHeight != h) // cause we can call twice to this method
+						_lastVideoHeight=_videoHeight; // store last value
+					
+					_videoHeight=h;
+					
+					//trace("[INFO] Video player Babelium: BEFORE SPLIT VIDEO PANEL Video area dimensions: "+_videoWidth+"x"+_videoHeight+" video dimensions: "+_video.width+"x"+_video.height+" video placement: x="+_video.x+" y="+_video.y+" last video area heigth: "+_lastVideoHeight);
+					
+					var scaleY:Number=h / _video.height;
+					var scaleX:Number=w / _video.width;
+					var scaleC:Number=scaleX < scaleY ? scaleX : scaleY;
+					
+					_video.y=Math.floor(h / 2 - (_video.height * scaleC) / 2);
+					_video.x=Math.floor(w / 2 - (_video.width * scaleC) / 2);
+					_video.y+=_defaultMargin;
+					_video.x+=_defaultMargin;
+					
+					_video.width*=scaleC;
+					_video.height*=scaleC;
+					
+					//trace("[INFO] Video player Babelium: AFTER SPLIT VIDEO PANEL Video area dimensions: "+_videoWidth+"x"+_videoHeight+" video dimensions: "+_video.width+"x"+_video.height+" video placement: x="+_video.x+" y="+_video.y+" last video area heigth: "+_lastVideoHeight);
+					
+					//Resize the cam display
+					scaleCamVideo(w,h);
+					
+					updateDisplayList(0, 0); // repaint
+					
+					//trace("The video panel has been splitted");
+				}
 
                 /**
                  * Recover video panel's original size
@@ -1196,7 +1184,7 @@ package modules.videoPlayer
                                  */
 							
                                 var w:Number=_videoWidth / 2 ;
-								var h:int=Math.ceil(w * 1.3);
+								var h:int=Math.ceil(w * 1);
 
                                 if (_videoHeight != h) // cause we can call twice to this method
                                         _lastVideoHeight=_videoHeight; // store last value
@@ -1207,13 +1195,13 @@ package modules.videoPlayer
                                 var scaleX:Number=w / _video.width;
                                 var scaleC:Number=scaleX < scaleY ? scaleX : scaleY;
 
-                                _video.y=Math.floor(h / 2.5 - (_video.height * scaleC) / 2);
+                                _video.y=0;
                                 _video.x=Math.floor(w / 2 - (_video.width * scaleC) / 2);
                                 _video.y+=_defaultMargin;
-                                _video.x+=_defaultMargin+5;
+                                _video.x+=_defaultMargin;
 								//width and heigth with the videopanel split
                                 _video.width*=scaleC;
-                                _video.height*=scaleC+0.2;
+                                _video.height*=scaleC+0.5;
 							
                         }
                 }
