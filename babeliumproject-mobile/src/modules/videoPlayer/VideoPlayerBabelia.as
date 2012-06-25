@@ -955,7 +955,7 @@ package modules.videoPlayer
 							// continue on
 						_mic.gain = 100;
 						_mic.rate = 22;
-						_mic.setSilenceLevel(0, 6000000);
+						_mic.setSilenceLevel(0, 3000);
 						_mic.setUseEchoSuppression(true);
 						_mic.setLoopBack(true);
 						_micCamEnabled=true;
