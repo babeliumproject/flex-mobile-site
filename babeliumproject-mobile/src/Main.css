@@ -44,7 +44,7 @@ s|ActionBar#search1 {
 .commonLinkButton{
 	skinClass:ClassReference("skins.IconLinkSkin");
 	fontWeight:bold;
-	fontSize: 15;
+	fontSize: 18;
 	colorOver:#2d89a4;
 	colorDown:#2d89a4;
 	color:#666666;
