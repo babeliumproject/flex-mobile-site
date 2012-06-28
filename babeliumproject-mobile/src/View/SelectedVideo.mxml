@@ -100,13 +100,12 @@
 				{
 					setupResponseOptions();
 					VideoPlayer.removeEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints);
-					
 					exer=data as ExerciseVO;
+					EXERCISE_NAME=exer.name as String;
 					// Retrieving selected exercise information
 					var tmp:ExerciseVO=data as ExerciseVO;
 					_exerciseName=tmp.name;
 					_exerciseTitle=tmp.title;
-					EXERCISE_NAME=_exerciseTitle;
 					_exerciseId=tmp.id;
 					DataModel.getInstance().selectExerciseId=_exerciseId;
 					_currentExercise=tmp;
@@ -659,15 +658,15 @@
 											 subtitles="true"
 											 autoPlay="false"
 											 autoScale="true"
-											 width="450"
-											 height="220"
+											 width="{this.width/2}"
+											 height="{this.height/1.8}"
 											 streamSource="{DataModel.getInstance().streamingResourcesPath}"
 											 controlsEnabled="true"/>
 			
 			<s:VGroup width="100%"
 					  horizontalAlign="center"
 					  paddingTop="16" minHeight="0" minWidth="0">
-				<s:Label text="{EXERCISE_NAME}"
+				<s:Label text="{_exerciseTitle}"
 						 styleName="sectionTitleLabel"
 						 id="selectedVideoName"/>
 				

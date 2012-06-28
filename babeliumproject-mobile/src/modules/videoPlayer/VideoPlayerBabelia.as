@@ -942,7 +942,6 @@ package modules.videoPlayer
                         if (state == RECORD_BOTH_STATE)
                         {
 								 _camera.setMode(DataModel.getInstance().cameraWidth, DataModel.getInstance().cameraHeight, 15, false);
-								 _camera.setQuality(65536,90);
 								 _camVideo = new Video(_camera.width, _camera.height);
 								//video.x = 100;
 								//video.y = 100;
