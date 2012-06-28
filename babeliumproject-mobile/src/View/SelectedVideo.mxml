@@ -102,11 +102,11 @@
 					VideoPlayer.removeEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints);
 					
 					exer=data as ExerciseVO;
-					EXERCISE_NAME=exer.name as String;
 					// Retrieving selected exercise information
 					var tmp:ExerciseVO=data as ExerciseVO;
 					_exerciseName=tmp.name;
 					_exerciseTitle=tmp.title;
+					EXERCISE_NAME=_exerciseTitle;
 					_exerciseId=tmp.id;
 					DataModel.getInstance().selectExerciseId=_exerciseId;
 					_currentExercise=tmp;

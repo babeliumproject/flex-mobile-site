@@ -74,11 +74,11 @@
 	</s:HGroup>
 	
 	<s:HGroup height="15%" width="100%" id="user_textarea" verticalAlign="bottom" horizontalAlign="center">
-	<s:TextArea  width="75%" height="50" fontSize="17" prompt="User Name"  textAlign="center" id="text" editable="true"/>
+	<s:TextArea  width="75%" height="45" fontSize="17" prompt="User Name"  textAlign="center" id="text" editable="true"/>
 	</s:HGroup>
 	
 	<s:HGroup height="10%" width="100%" id="pass_textarea" verticalAlign="middle" horizontalAlign="center">
-	<s:TextArea  width="75%" height="50" fontSize="17" prompt="Password" displayAsPassword="true"  textAlign="center" id="text2" />
+	<s:TextArea  width="75%" height="45" fontSize="17" prompt="Password" displayAsPassword="true"  textAlign="center" id="text2" />
 	</s:HGroup>
 	
 	<s:HGroup height="3%" width="100%" id="logingroup"  horizontalAlign="center" verticalAlign="top" enabled="true" visible="true" >
