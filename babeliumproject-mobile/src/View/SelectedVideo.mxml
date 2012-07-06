@@ -668,7 +668,7 @@
 					  paddingTop="16" minHeight="0" minWidth="0">
 				<s:Label text="{_exerciseTitle}"
 						 styleName="sectionTitleLabel"
-						 id="selectedVideoName"/>
+						 id="selectedVideoName"  textJustify="interWord"/>
 				
 				<s:VGroup  id="bigarren"
 						  height="100%"

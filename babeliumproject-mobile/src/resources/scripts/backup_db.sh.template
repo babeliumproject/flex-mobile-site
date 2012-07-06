@@ -1,0 +1,7 @@
+
+currentdate=`date +%Y%m%d%H%M`
+backupdir=<VHOST_ROOT>
+backupfile="<VHOST_ROOT>/backups/backupdb_$currentdate.sql"
+mysqldump -h <HOST> --add-drop-table -u <USERNAME> -<PASSWORD> <SCHEMA_NAME> > $backupfile
+unlink $backupdir/all.sql
+ln -s $backupfile $backupdir/all.sql

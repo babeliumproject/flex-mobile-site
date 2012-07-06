@@ -1,0 +1,14 @@
+#Send pending SpinVox requests every hour and save the output into /tmp/spinvox_req_log
+0  * * * * /usr/bin/php /var/www/babelia/amfphp/services/babelia/SendRequests.php >> /tmp/spinvox_req_log
+
+#Get the transcriptions from spinvox server every hour at 30 past and save the output into /tmp/spinvox_trans_log
+30 * * * * /usr/bin/php /var/www/babelia/amfphp/services/babelia/GetTranscriptions.php >> /tmp/spinvox_trans_log
+
+#Transcode the videos that are on processing status every 10 minutes save the output into /tmp/transcode_log
+*/10 * * * * /usr/bin/php /var/www/babelia/amfphp/services/babelia/ProcessVideosCron.php >> /tmp/babelium/transcode_log
+
+#Delete all the video resources that are not referenced in the database
+0,30 * * * * /usr/bin/php /var/www/babelia/amfphp/services/babelia/DeleteUnreferencedVideosCron.php >> /tmp/babelium/periodic_task_log
+
+#Monitor the user's session keep alive value and close the session if needed
+*/5 * * * * /usr/bin/php /var/www/babelia/amfphp/services/babelia/KeepAliveMonitorCron.php >> /tmp/babelium/periodic_task_log

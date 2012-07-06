@@ -1,0 +1,83 @@
+<?php
+	
+	//This file stores the info needed to connect to the application's database
+	class Config{
+		public $host = "";
+		public $db_username = "";
+		public $db_password = "";
+		public $db_name = "babeliumproject";
+		
+		//Server path to store uploaded files
+		public $filePath = '';
+		public $imagePath = '';
+		public $red5Path = '/opt/red5/webapps/oflaDemo/streams';
+		
+		//Youtube authentication data
+		public $yt_user = '';
+		public $yt_password = '';
+		public $yt_developerKey = '';
+		
+		//SpinVox settings
+		public $spinvox_user = '';
+		public $spinvox_password = '';
+		public $spinvox_accountId = '';
+		public $spinvox_appName = '';
+		public $spinvox_useragent = 'babelium';
+		
+		//Smtp server settings
+		public $smtp_server_host = 'smtp.googlemail.com';
+		public $smtp_server_username = ''; //example -> from example@gmail.com
+		public $smtp_server_password = '';
+		public $smtp_server_ssl = 'ssl';
+		public $smtp_server_port = 465;
+		public $smtp_mail_setFromMail = ''; //example@gmail.com
+		public $smtp_mail_setFromName = 'Babelium Project Admin';
+		
+		//Video upload constants
+		public $frameHeight = 240;
+		public $frameWidth16_9 = 426;
+		public $frameWidth4_3 = 320;
+		public $maxDuration = 120; //seconds
+		public $maxSize = 180; //MByte
+		
+		//Path to store the notification templates
+		public $templatePath = '';
+
+		//Directory for temporary files
+		public $temp_folder = '/tmp';
+		
+		//Server path to store the search index. Must be a folder with write permissions set for www-data
+		public $indexPath = '';
+
+		//Number of tags for the cloud of tags
+		public $numTags = 25;
+		
+		//Secret key used for GoogleCode's webhooks' authentication
+		public $project_secret_key = '';
+		
+		//
+		public $logPath = '';
+
+		
+		/*
+		 * PHP CLI gets no value from $_SERVER ['DOCUMENT_ROOT'] so we must use getcwd() and 
+		 * cut off the subfolders or use a variable and remember to change it.
+		 */ 
+		public $webRootPath = "/var/www/babelia";
+		
+		public function Config(){
+			if(!empty($_SERVER ['DOCUMENT_ROOT'])){
+				$this->filePath = $_SERVER ['DOCUMENT_ROOT'] . "/resources/uploads";
+				$this->imagePath = $_SERVER ['DOCUMENT_ROOT'] . "/resources/images/thumbs";
+				$this->templatePath = $_SERVER ['DOCUMENT_ROOT'] . "/resources/templates";
+				$this->indexPath = $_SERVER ['DOCUMENT_ROOT'] . "/resources/searchIndexes";
+			} else {
+				$this->filePath = $this->webRootPath . "/resources/uploads";
+				$this->imagePath = $this->webRootPath . "/resources/images/thumbs";
+				$this->templatePath = $this->webRootPath . "/resources/templates";
+				$this->indexPath = $this->webRootPath . "/resources/searchIndexes";
+			}	
+		}
+	}
+	
+?>
