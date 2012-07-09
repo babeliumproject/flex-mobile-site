@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  width="100%" xmlns:skins="skins.*">
+
+	<s:BorderContainer styleName="sectionInfoBox"
+					   width="100%"
+					   minWidth="1000"
+					   minHeight="0">
+		<s:layout>
+			<s:VerticalLayout paddingTop="16"/>
+		</s:layout>
+		<s:Label text="{resourceManager.getString('myResources','LABEL_ABOUT_SECTION')}"
+				 styleName="sectionInfoTitleLabel"
+				 paddingLeft="16"
+				 paddingRight="16"/>
+		<s:Label text="{resourceManager.getString('myResources','ABOUT_SECTION_DESCRIPTION')}"
+				 paddingBottom="16"
+				 paddingLeft="16"
+				 paddingRight="16"/>
+		<skins:HorizontalSeparatorLine width="100%"/>
+	</s:BorderContainer>
+
+	<s:VGroup paddingBottom="16"
+			  paddingTop="16"
+			  paddingLeft="16"
+			  paddingRight="16"
+			  width="100%">
+		<s:Label text="{resourceManager.getString('myResources','LABEL_WHO_ARE_WE')}"
+				 styleName="boldYellowLabel"/>
+		<s:HGroup width="100%"
+				  verticalAlign="middle">
+			<mx:Spacer width="10"/>
+			<mx:Image id="groupLogo"
+					  height="87"
+					  width="87"
+					  source="resources/images/ghym_logo_degr_87px.png"/>
+			<s:Label text="{resourceManager.getString('myResources','TEXT_WHO_ARE_WE')}"
+					 width="850"
+					 height="100%"
+					 verticalAlign="middle"/>
+		</s:HGroup>
+		<mx:Spacer height="24"/>
+		<s:Label text="{resourceManager.getString('myResources','LABEL_CONTACT_INFO')}"
+				 styleName="boldYellowLabel"/>
+		<s:VGroup width="100%">
+			<s:Label text="{resourceManager.getString('myResources','LABEL_FEEDBACK')}"/>
+			<skins:IconButton label="babeliumproject@gmail.com"
+						   styleName="commonLinkButton"
+						   click="emailButtonClickHandler(event)"/>
+		</s:VGroup>
+		<mx:Spacer height="24"/>
+		<s:Label text="{resourceManager.getString('myResources','LABEL_APPLICATION_INFO')}"
+				 styleName="boldYellowLabel"/>
+		<s:VGroup width="100%">
+			<s:HGroup width="100%">
+				<s:Label text="{resourceManager.getString('myResources','LABEL_APPLICATION_VERSION')}"/>
+				<s:Label id="appRevisionLabel"
+						 styleName="boldDarkGreyLabel"/>
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<s:Label text="{resourceManager.getString('myResources','LABEL_USERS_FLASH_VERSION')}"/>
+				<s:Label id="flashVersionLabel"
+						 styleName="boldDarkGreyLabel"
+						 text="{userFlashVersion()}"/>
+			</s:HGroup>
+			<!--
+				 s:Label text="{resourceManager.getString('myResources','TEXT_LICENSE_DISCLAIMER')}"
+				 / -->
+		</s:VGroup>
+		<mx:Spacer height="24"/>
+		<s:Label text="{resourceManager.getString('myResources','LABEL_THIRD_PARTY_STUFF')}"
+				 styleName="boldYellowLabel"/>
+
+		<s:HGroup width="100%" horizontalAlign="center">
+			<mx:DataGrid borderStyle="solid"
+						 headerBackgroundSkin="skins.DataGridHeaderGradientSkin"
+						 sortableColumns="false"
+						 selectable="false"
+						 editable="false"
+						 width="100%"
+						 dataProvider="{productData}"
+						 rowCount="{productData.length}">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Product"
+									   dataField="product"
+									   textAlign="center"/>
+					<mx:DataGridColumn headerText="License"
+									   editable="false"
+									   textAlign="center">
+						<mx:itemRenderer>
+							<fx:Component>
+								<mx:LinkButton click="outerDocument.licenseUrlClickHandler(event)"
+											   label="{data.licenseName}"/>
+							</fx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="Website"
+									   editable="false"
+									   textAlign="center">
+						<mx:itemRenderer>
+							<fx:Component>
+								<mx:LinkButton click="outerDocument.productUrlClickHandler(event)"
+											   label="{data.productUrl}"/>
+							</fx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+				</mx:columns>
+			</mx:DataGrid>
+		</s:HGroup>
+	</s:VGroup>
+
+	<fx:Binding source="{DataModel.getInstance().preferencesRetrieved}"
+				destination="onPreferencesRetrieved"/>
+	<fx:Script>
+		<![CDATA[
+			import model.DataModel;
+
+			import mx.controls.LinkButton;
+
+			[Bindable]
+			public var productData:Array=new Array(
+
+				{product: 'MySQL Server Community Edition', licenseName: 'GNU General Public License v2', licenseUrl: 'http://www.gnu.org/licenses/old-licenses/gpl-2.0.html', productUrl: 'http://www.mysql.com'}, {product: 'PHP', licenseName: 'The PHP License v3.01', licenseUrl: 'http://www.php.net/license/3_01.txt', productUrl: 'http://www.php.net'}, {product: 'Zend Framework', licenseName: 'New BSD License', licenseUrl: 'http://framework.zend.com/license', productUrl: 'http://framework.zend.com/'}, {product: 'Red5', licenseName: 'GNU Lesser General Public License', licenseUrl: 'http://www.gnu.org/licenses/lgpl.html', productUrl: 'http://code.google.com/p/red5/'}, {product: 'Adobe Flex SDK 4.0', licenseName: 'Adobe Flex SDK License', licenseUrl: 'http://www.adobe.com/products/eulas/pdfs/Adobe_Flex_Software_Development_Kit-en_US-20071221_1748.pdf', productUrl: 'http://www.adobe.com/products/flex/'}, {product: 'Cairngorm v2', licenseName: 'Cairngorm License', licenseUrl: 'http://opensource.adobe.com/wiki/display/cairngorm/License', productUrl: 'http://opensource.adobe.com/wiki/display/cairngorm/About'}, {product: 'AS3CoreLib', licenseName: 'New BSD License', licenseUrl: 'http://www.opensource.org/licenses/bsd-license.php', productUrl: 'http://code.google.com/p/as3corelib/'}, {product: 'RTMP Video Player', licenseName: 'MIT License', licenseUrl: 'http://www.opensource.org/licenses/mit-license.php', productUrl: 'http://lelandcope.com/flex-video-player-red5-compatable/'}, {product: 'Hulstkamp Rating Component', licenseName: 'The Apache License v2', licenseUrl: 'http://www.apache.org/licenses/LICENSE-2.0', productUrl: 'http://www.hulstkamp.com/2009/03/12/skinning-and-creating-custom-rating-component-in-flex-4-gumbo/329'}, {product: 'Silk Icons v1.03', licenseName: 'Creative Commons Attribution 2.5 License', licenseUrl: 'http://creativecommons.org/licenses/by/2.5/', productUrl: 'http://www.famfamfam.com/lab/icons/silk/'}
+
+				);
+
+			public function set onPreferencesRetrieved(flag:Boolean):void
+			{
+				if (DataModel.getInstance().prefDic != null)
+					appRevisionLabel.text=DataModel.getInstance().prefDic['dbrevision'];
+			}
+
+			public function licenseUrlClickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest((event.target as LinkButton).data.licenseUrl));
+			}
+
+			public function productUrlClickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest((event.target as LinkButton).data.productUrl));
+			}
+
+			public function emailButtonClickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest('mailto:babeliumproject@gmail.com'));
+			}
+
+			private function userFlashVersion():String
+			{
+				var isDebugger:Boolean=Capabilities.isDebugger;
+				var versionString:String=Capabilities.version;
+				var pattern:RegExp=/^(\w*) (\d*),(\d*),(\d*),(\d*)$/;
+				var result:Object=pattern.exec(versionString);
+				var text:String=resourceManager.getString('myResources', 'LABEL_UNKOWN_FLASH_VERSION');
+				if (result != null)
+				{
+					if (result[1] == "WIN")
+						text="Windows ";
+					if (result[1] == "LNX")
+						text="Linux ";
+					if (result[1] == "MAC")
+						text="MacOS ";
+					text+=result[2] + '.' + result[3] + '.' + result[4] + '.' + result[5];
+				}
+				if (isDebugger)
+					text+='  (Debugger)';
+				return text;
+			}
+		]]>
+	</fx:Script>
+
+</s:VGroup>

@@ -3,8 +3,8 @@ package control {
 	
 /*	import commands.VideoStopCommand;
 	import commands.autoevaluation.*;
-	import commands.configuration.*;
-	import commands.evaluation.*;*/
+	import commands.configuration.*;*/
+	import commands.evaluation.*;
 	import commands.exercises.*;
 	
 	
@@ -138,7 +138,9 @@ package control {
 			addCommand(ExerciseEvent.USER_REPORTED_EXERCISE, UserReportedExerciseCommand);
 			
 			//Evaluation management commands
+			*/
 			addCommand(EvaluationEvent.GET_RESPONSES_WAITING_ASSESSMENT, GetResponsesWaitingAssessmentCommand);
+			/*
 			addCommand(EvaluationEvent.GET_RESPONSES_ASSESSED_TO_CURRENT_USER, GetResponsesAssessedToCurrentUserCommand);
 			addCommand(EvaluationEvent.GET_RESPONSES_ASSESSED_BY_CURRENT_USER, GetResponsesAssessedByCurrentUserCommand);
 			addCommand(EvaluationEvent.ADD_ASSESSMENT, AddAssessmentCommand);

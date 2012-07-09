@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  horizontalAlign="center"
+		  verticalAlign="top"
+		  paddingTop="20"
+		  gap="10"
+		  width="100%" xmlns:skins="skins.*">
+
+	<fx:Script>
+		<![CDATA[
+			import events.ViewChangeEvent;
+
+			import model.DataModel;
+
+			import modules.userManagement.LoginRestorePassForm;
+
+			import mx.core.Application;
+			import mx.core.FlexGlobals;
+			import mx.managers.PopUpManager;
+
+			private var loginPop:LoginRestorePassForm;
+
+			protected function signInLink_clickHandler(event:MouseEvent):void
+			{
+				DataModel.getInstance().loginPop=LoginRestorePassForm(PopUpManager.createPopUp(FlexGlobals.topLevelApplication.parent, LoginRestorePassForm, true));
+				PopUpManager.centerPopUp(DataModel.getInstance().loginPop);
+			}
+
+			protected function signUpLink_clickHandler(event:MouseEvent):void
+			{
+				new ViewChangeEvent(ViewChangeEvent.VIEW_REGISTER_MODULE).dispatch();
+			}
+		]]>
+	</fx:Script>
+
+	<s:BorderContainer cornerRadius="8"
+					   borderColor="#FFFFFF"
+					   dropShadowVisible="true">
+		<s:BitmapImage source="@Embed('/resources/images/popup_bgr_wrong.png')"
+					   right="0"
+					   top="0"/>
+		<s:VGroup width="100%"
+				  height="100%"
+				  paddingBottom="16"
+				  paddingLeft="16"
+				  paddingRight="16"
+				  paddingTop="16">
+			<s:Label text="{resourceManager.getString('myResources','MESSAGE_YOU_MUST_BE_REGISTERED')}"
+					 styleName="errorLabel"
+					 fontSize="16"/>
+			<s:HGroup width="100%"
+					  horizontalAlign="center"
+					  verticalAlign="middle"
+					  paddingTop="30">
+				<s:Label text="{resourceManager.getString('myResources','LABEL_CLICK_HERE')}"/>
+				<skins:IconButton id="signInLink"
+							   label="{resourceManager.getString('myResources','BUTTON_HERE')}"
+							   click="signInLink_clickHandler(event)"
+							   styleName="commonLinkButton"/>
+				<s:Label text="{resourceManager.getString('myResources','MESSAGE_TO_SIGN_IN_TO_SIGN_UP')}"/>
+				<skins:IconButton id="signUpLink"
+							   label="{resourceManager.getString('myResources','BUTTON_HERE')}"
+							   click="signUpLink_clickHandler(event)"
+							   styleName="commonLinkButton"/>
+			</s:HGroup>
+		</s:VGroup>
+	</s:BorderContainer>
+
+
+</s:VGroup>

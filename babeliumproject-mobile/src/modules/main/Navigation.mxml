@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:skins="skins.*"
+		 width="100%">
+
+	<s:VGroup width="100%"
+			  minWidth="1000"
+			  height="100%"
+			  gap="0">
+		<skins:HorizontalSeparatorLine/>
+		<s:BorderContainer id="sectionLinks"
+						   borderVisible="false"
+						   borderWeight="0"
+						   minHeight="0"
+						   width="100%"
+						   height="100%"
+						   backgroundImage="@Embed('/resources/images/rainbow_bgr.png')"
+						   backgroundImageFillMode="scale">
+			<s:layout>
+				<s:HorizontalLayout paddingLeft="200"
+									horizontalAlign="center"
+									verticalAlign="middle"
+									clipAndEnableScrolling="true"/>
+			</s:layout>
+			<skins:NavigationToggleButton label="{resourceManager.getString('myResources', 'LABEL_HOME')}"
+										  styleName="homeLinkButton"
+										  skinClass="skins.NavigationToggleButtonSkin"
+										  enabled="{!DataModel.getInstance().recordingExercise &amp;&amp;
+						   							!DataModel.getInstance().recording &amp;&amp;
+						   							!DataModel.getInstance().playing}"
+										  selected="{DataModel.getInstance().currentContentViewStackIndex == ViewChangeEvent.VIEWSTACK_HOME_MODULE_INDEX}"
+										  click="changeView(ViewChangeEvent.VIEW_HOME_MODULE,event)"/>
+			<mx:VRule height="40"/>
+			<skins:NavigationToggleButton label="{resourceManager.getString('myResources', 'LABEL_EXERCISES')}"
+										  styleName="practiceLinkButton"
+										  skinClass="skins.NavigationToggleButtonSkin"
+										  enabled="{!DataModel.getInstance().recordingExercise &amp;&amp;
+						   							!DataModel.getInstance().recording &amp;&amp;
+						   							!DataModel.getInstance().playing}"
+										  selected="{DataModel.getInstance().currentContentViewStackIndex == ViewChangeEvent.VIEWSTACK_EXERCISE_MODULE_INDEX}"
+										  click="changeView(ViewChangeEvent.VIEW_EXERCISE_MODULE,event)"/>
+			<mx:VRule height="40"/>
+			<skins:NavigationToggleButton label="{resourceManager.getString('myResources', 'LABEL_EVALUATIONS')}"
+										  styleName="evaluateLinkButton"
+										  skinClass="skins.NavigationToggleButtonSkin"
+										  enabled="{DataModel.getInstance().isLoggedIn &amp;&amp;
+						   							!DataModel.getInstance().recordingExercise &amp;&amp;
+						   							!DataModel.getInstance().recording &amp;&amp;
+						   							!DataModel.getInstance().playing}"
+										  selected="{DataModel.getInstance().currentContentViewStackIndex == ViewChangeEvent.VIEWSTACK_EVALUATION_MODULE_INDEX}"
+										  click="changeView(ViewChangeEvent.VIEW_EVALUATION_MODULE,event)"/>
+			<mx:VRule height="40"/>
+			<skins:NavigationToggleButton label="{resourceManager.getString('myResources', 'LABEL_SUBTITLE')}"
+										  styleName="subtitleLinkButton"
+										  skinClass="skins.NavigationToggleButtonSkin"
+										  enabled="{DataModel.getInstance().isLoggedIn &amp;&amp;
+						   							!DataModel.getInstance().recordingExercise &amp;&amp;
+						   							!DataModel.getInstance().recording &amp;&amp;
+						   							!DataModel.getInstance().playing}"
+										  selected="{DataModel.getInstance().currentContentViewStackIndex == ViewChangeEvent.VIEWSTACK_SUBTITLE_MODULE_INDEX}"
+										  click="changeView(ViewChangeEvent.VIEW_SUBTITLE_MODULE,event)"/>
+			<mx:VRule height="40"/>
+			<skins:NavigationToggleButton label="{resourceManager.getString('myResources', 'LABEL_CONFIGURATION')}"
+										  id="configuration"
+										  styleName="configureLinkButton"
+										  skinClass="skins.NavigationToggleButtonSkin"
+										  enabled="{DataModel.getInstance().isLoggedIn &amp;&amp; 
+						   							!DataModel.getInstance().recordingExercise &amp;&amp;
+						   							!DataModel.getInstance().recording &amp;&amp;
+						   							!DataModel.getInstance().playing}"
+										  selected="{DataModel.getInstance().currentContentViewStackIndex == ViewChangeEvent.VIEWSTACK_CONFIGURATION_MODULE_INDEX}"
+										  click="changeView(ViewChangeEvent.VIEW_CONFIGURATION_MODULE,event)"/>
+			<mx:VRule height="40"/>
+			<skins:NavigationToggleButton label="{resourceManager.getString('myResources', 'LABEL_ABOUT')}"
+										  styleName="aboutLinkButton"
+										  skinClass="skins.NavigationToggleButtonSkin"
+										  enabled="{!DataModel.getInstance().recordingExercise &amp;&amp;
+						   							!DataModel.getInstance().recording &amp;&amp;
+						   							!DataModel.getInstance().playing}"
+										  selected="{DataModel.getInstance().currentContentViewStackIndex == ViewChangeEvent.VIEWSTACK_ABOUT_MODULE_INDEX}"
+										  click="changeView(ViewChangeEvent.VIEW_ABOUT_MODULE,event)"/>
+		</s:BorderContainer>
+		<skins:HorizontalSeparatorLine alpha="0.50"/>
+		<s:BorderContainer id="searchUploadBar"
+						   borderVisible="false"
+						   borderWeight="0"
+						   minHeight="0"
+						   width="100%"
+						   minWidth="1000"
+						   dropShadowVisible="true">
+			<s:backgroundFill>
+				<mx:LinearGradient>
+					<mx:entries>
+						<mx:GradientEntry color="#ffffff"
+										  ratio="0"
+										  alpha="0.5"/>
+						<mx:GradientEntry color="#268caa"
+										  ratio="1"
+										  alpha="0.5"/>
+					</mx:entries>
+				</mx:LinearGradient>
+			</s:backgroundFill>
+			<s:layout>
+				<s:HorizontalLayout paddingLeft="200"
+									verticalAlign="middle"
+									paddingTop="4"
+									paddingBottom="4"
+									paddingRight="4"/>
+			</s:layout>
+			<s:Button label="{resourceManager.getString('myResources','LABEL_UPLOAD')}"
+					  styleName="uploadButton"
+					  buttonMode="true"
+					  enabled="{!DataModel.getInstance().recordingExercise}"
+					  click="changeView(ViewChangeEvent.VIEW_UPLOAD_MODULE,event)"/>
+			<mx:Spacer width="30"/>
+			<s:TextInput id="searchField"
+						 styleName="searchTextInput"
+						 width="100%"
+						 maxChars="100"
+						 enter="launchSearch(null)"/>
+			<s:Button label="{resourceManager.getString('myResources','LABEL_SEARCH')}"
+					  styleName="searchButton"
+					  buttonMode="true"
+					  enabled="true"
+					  click="launchSearch(event)"/>
+		</s:BorderContainer>
+		<skins:HorizontalSeparatorLine/>
+	</s:VGroup>
+
+	<mx:Image source="resources/images/flan_dull.png"
+			  x="20"
+			  buttonMode="true"
+			  click="changeView(ViewChangeEvent.VIEW_HOME_MODULE,event)"/>
+
+
+	<fx:Binding source="{DataModel.getInstance().tagCloudClicked}"
+				destination="this.onTagCloudClicked"/>
+	<fx:Script>
+		<![CDATA[
+			import events.SearchEvent;
+			import events.VideoStopEvent;
+			import events.ViewChangeEvent;
+
+			import model.DataModel;
+
+			import skins.NavigationToggleButtonSkin;
+
+			//Initialization method
+			private function init():void
+			{
+			}
+
+			private function changeView(destination:String, event:MouseEvent):void
+			{
+//				if(event != null)
+//					unselectNavButtons(event);
+				new ViewChangeEvent(destination).dispatch();
+			}
+
+			private function unselectNavButtons(event:MouseEvent):void
+			{
+				var pressedButton:NavigationToggleButton=event.target as NavigationToggleButton;
+				for (var i:uint=0; i < sectionLinks.numElements; i++)
+				{
+					if (sectionLinks.getElementAt(i) is NavigationToggleButton)
+					{
+						var navButton:NavigationToggleButton=sectionLinks.getElementAt(i) as NavigationToggleButton;
+						if (navButton != pressedButton)
+							navButton.selected=false;
+					}
+				}
+			}
+
+			private function launchSearch(event:MouseEvent):void
+			{
+				DataModel.getInstance().searchField=searchField.text;
+				//if (DataModel.getInstance().currentContentViewStackIndex != ViewChangeEvent.VIEWSTACK_SEARCH_MODULE_INDEX)
+				//{
+				changeView(ViewChangeEvent.VIEW_SEARCH_MODULE, event);
+				//}
+				new SearchEvent(SearchEvent.LAUNCH_SEARCH).dispatch();
+			}
+
+			public function set onTagCloudClicked(value:Boolean):void
+			{
+				if (DataModel.getInstance().tagCloudClicked)
+				{
+					searchField.text=DataModel.getInstance().searchField;
+					DataModel.getInstance().tagCloudClicked=false;
+				}
+			}
+		]]>
+	</fx:Script>
+
+</s:Group>

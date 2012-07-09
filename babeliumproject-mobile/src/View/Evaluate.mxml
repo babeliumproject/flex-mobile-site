@@ -1,10 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		xmlns:s="library://ns.adobe.com/flex/spark"
-		xmlns:utils="utils.*" skinClass="skins.CustomViewBackground">
-	<utils:search width="100%" />
+		xmlns:utils="utils.*" skinClass="skins.CustomViewBackground"  creationComplete="view1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			
+			import mx.events.FlexEvent;
+			import events.EvaluationEvent;
+			import utils.CustomItemRendererEvaluationTable;
+			import mx.collections.ArrayCollection;
+			import model.DataModel;
+			
+			
+			[Bindable]
+			private var waitingForAssessmentList:ArrayCollection;
+			
+			
+			
+			private function set waitingAssessmentRetrievedHandler(value:Boolean):void
+			{
+				trace(waitingForAssessmentList.length + "erantzunak hartzen dituuuuuuuuhuhuh");
+				var waDataprovider:ArrayCollection=DataModel.getInstance().waitingForAssessmentData;
+				waitingForAssessmentList=waDataprovider;
+				
+				
+			}
+			
+			protected function view1_creationCompleteHandler(event:FlexEvent):void
+			{
+				new EvaluationEvent(EvaluationEvent.GET_RESPONSES_WAITING_ASSESSMENT).dispatch();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Binding source="{DataModel.getInstance().waitingForAssessmentDataRetrieved}"
+				destination="waitingAssessmentRetrievedHandler"/>
+	
+	<s:VGroup width="100%" height="100%">
+		
+		<utils:search width="100%"/>
+		<s:VGroup horizontalAlign="center" width="100%" paddingTop="16" paddingBottom="16">
+			<s:Label text="List of assessment pending responses"
+					 styleName="sectionTitleLabel"
+					 id="userProfileTitleLabel"/>
+			<s:Line width="{userProfileTitleLabel.width}">
+				<s:stroke>
+					<s:SolidColorStroke weight="3"
+										color="{userProfileTitleLabel.getStyle('color')}"/>
+				</s:stroke>
+			</s:Line>
+		</s:VGroup>
+		<s:List id="latestUploadedVideosDataGroup"
+				pageScrollingEnabled="true"
+				width="100%" height="100%"
+				skinClass="skins.TransparentBgListSkin"
+				dataProvider="{waitingForAssessmentList}">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+		</s:List>
+		
+	</s:VGroup>
 	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
 </s:View>
+

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:userManagement="modules.userManagement.*"
+		  xmlns:exercises="modules.exercises.*"
+		  xmlns:home="modules.home.*"
+		  xmlns:main="modules.main.*"
+		  xmlns:subtitles="modules.subtitles.*"
+		  xmlns:videoUpload="modules.videoUpload.*"
+		  xmlns:evaluation="modules.evaluation.*"
+		  xmlns:configuration="modules.configuration.*"
+		  xmlns:search="modules.search.*"
+		  height="100%"
+		  width="100%"
+		  paddingBottom="40"
+		  minWidth="1000"
+		  gap="0"
+		  creationComplete="onComplete()"
+		  xmlns:skins="skins.*">
+
+	<skins:CustomViewStack id="contentViewStack"
+						   width="100%"
+						   height="100%"
+						   selectedIndex="{ DataModel.getInstance().currentContentViewStackIndex }"
+						   change="handleIndexChange(event)">
+
+		<home:HomeMain id="homeModule"/>
+
+		<exercises:Exercises id="exerciseModule"/>
+
+		<evaluation:EvaluationContainer id="evaluationModule"/>
+
+		<userManagement:SignUpForm id="registerModule"/>
+
+		<userManagement:AccountContainer id="accountModule"/>
+
+		<videoUpload:UploadContainer id="uploadModule"/>
+
+		<subtitles:SubtitleMain id="subtitlingModule"/>
+
+		<configuration:ConfigurationContainer id="configurationModule"/>
+
+		<main:About id="aboutModule"/>
+
+		<search:Search id="searchModule"/>
+
+		<main:HelpFAQMain id="helpModule"/>
+
+		<userManagement:AccountActivation id="accountActivation"/>
+
+	</skins:CustomViewStack>
+
+	<fx:Script>
+		<![CDATA[
+			import events.UserEvent;
+			import events.VideoStopEvent;
+			
+			import model.DataModel;
+			import spark.events.IndexChangeEvent;
+
+			public function onComplete():void
+			{
+//				contentViewStack.addEventListener(IndexChangedEvent.CHANGE, handleIndexChange);
+			}
+
+			public function handleIndexChange(evt:IndexChangeEvent):void
+			{
+				DataModel.getInstance().oldContentViewStackIndex=evt.oldIndex;
+				DataModel.getInstance().newContentViewStackIndex=evt.newIndex;
+				// Video stop on tab change
+				new VideoStopEvent().dispatch();
+			}
+		]]>
+	</fx:Script>
+</s:VGroup>

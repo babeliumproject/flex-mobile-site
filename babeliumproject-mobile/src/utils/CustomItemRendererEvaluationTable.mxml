@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx">
+
+	<fx:Script>
+		<![CDATA[
+			import model.DataModel;
+			
+			import modules.main.VideoPaginator;
+			
+			import mx.collections.ArrayCollection;
+		//	import mx.events.ListEvent;
+			
+			import spark.components.Button;
+
+
+			[Bindable]
+			private var _currentPage:int=1;
+
+			[Bindable]
+			private var _dataProvider:ArrayCollection = new ArrayCollection();
+
+			public function set currentPaginationPage(value:uint):void
+			{
+				_currentPage=value;
+				createPagination();
+			}
+
+			public function set dataProvider(assessedToCurrentUserData:ArrayCollection):void
+			{
+				_dataProvider=assessedToCurrentUserData;
+				if (_dataProvider && _dataProvider.length > 0)
+				{
+					evaluationTable.includeInLayout=true;
+					evaluationTable.visible=true;
+					createPagination();
+				}
+				else
+				{
+					evaluationTable.includeInLayout=false;
+					evaluationTable.visible=false;
+				}
+			}
+
+			public function set itemRenderer(renderer:Class):void
+			{
+				evaluationTableColumn.itemRenderer=new ClassFactory(renderer);
+			}
+
+			/*public function set changeListener(changeFunction:Function):void
+			{
+				evaluationTable.addEventListener(ListEvent.CHANGE, changeFunction);
+			}*/
+
+			public function createPagination():void
+			{
+				VideoPaginator.createPaginationMenu(_dataProvider.length, DataModel.getInstance().pageSize, _currentPage, DataModel.getInstance().numberOfPagesNav, paginationBox, navigateToPage);
+				refreshDataProvider();
+			}
+
+			private function navigateToPage(event:MouseEvent):void
+			{
+				//Go to the page
+				_currentPage=int((event.target as Button).id);
+				//Refresh the pagination controls
+				createPagination();
+			}
+
+			public function refreshDataProvider():void
+			{
+				var current:int=_currentPage - 1;
+				var pageSize:int=DataModel.getInstance().pageSize;
+				var dataTemp:ArrayCollection=new ArrayCollection(_dataProvider.source.slice((current * pageSize), (current * pageSize) + pageSize));
+				evaluationTable.rowCount=dataTemp.length;
+				evaluationTable.dataProvider=dataTemp;
+			}
+		]]>
+	</fx:Script>
+
+
+	<s:DataGrid id="evaluationTable"
+				 width="100%"
+				 editable="false"
+				 sortableColumns="false"
+				 draggableColumns="false"
+				 headerHeight="0"
+				 dataProvider="{_dataProvider}">
+		<s:columns>
+			<s:DataGridColumn id="evaluationTableColumn"/>
+		</s:columns>
+	</s:DataGrid>
+
+	<s:HGroup id="paginationBox"
+			  width="100%"
+			  horizontalAlign="center"
+			  gap="2"/>
+
+</s:VGroup>

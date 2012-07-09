@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:skins="skins.*"
+		 width="100%"
+		 height="45">
+
+	<fx:Script>
+		<![CDATA[
+			import events.ViewChangeEvent;
+			
+			import flash.net.navigateToURL;
+			
+			protected function footerFAQ_clickHandler(event:MouseEvent):void
+			{
+				new ViewChangeEvent(ViewChangeEvent.VIEW_HELP_MODULE).dispatch();
+			}
+
+			protected function footerAboutUs_clickHandler(event:MouseEvent):void
+			{
+				new ViewChangeEvent(ViewChangeEvent.VIEW_ABOUT_MODULE).dispatch();
+			}
+			
+			protected function footerDevelopers_clickHandler(event:MouseEvent):void{
+				navigateToURL(new URLRequest('http://code.google.com/p/babeliumproject/'), '_blank');
+			}
+
+
+			protected function footerTermsOfUse_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+
+			protected function footerCopyleft_clickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest('http://www.gnu.org/licenses/gpl.html'), '_blank');
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+
+	<s:Group width="100%"
+			 minWidth="1000"
+			 height="100%">
+
+		<s:BorderContainer styleName="sectionInfoBox"
+						   width="100%"
+						   minHeight="30"
+						   minWidth="1000"
+						   y="15">
+			<skins:HorizontalSeparatorLine width="100%"/>
+		</s:BorderContainer>
+
+		<s:HGroup width="100%"
+				  minWidth="1000"
+				  horizontalAlign="center">
+			<s:BorderContainer cornerRadius="4"
+							   width="95%"
+							   height="55"
+							   y="15"
+							   borderColor="#E0E0E0"
+							   borderAlpha="0.80"
+							   borderVisible="true">
+				<s:layout>
+					<s:HorizontalLayout paddingTop="16"
+										paddingLeft="16"/>
+				</s:layout>
+				
+				<s:HGroup verticalAlign="middle">
+					<skins:IconButton id="footerFAQ"
+									  label="FAQ"
+									  click="footerFAQ_clickHandler(event)"
+									  styleName="footerLinkButton"/>
+					<s:Label text="|"/>
+					<skins:IconButton id="footerAboutUs"
+									  label="{resourceManager.getString('myResources','ABOUT_US')}"
+									  click="footerAboutUs_clickHandler(event)"
+									  styleName="footerLinkButton"/>
+					<s:Label text="|"/>
+					<skins:IconButton id="footerDevelopers"
+									  label="{resourceManager.getString('myResources','DEVELOPERS')}"
+									  click="footerDevelopers_clickHandler(event)"
+									  styleName="footerLinkButton"/>
+					<s:Label text="|"/>
+					<skins:IconButton id="footerTermsOfUse"
+									  label="{resourceManager.getString('myResources','TERMS_OF_USE')}"
+									  click="footerTermsOfUse_clickHandler(event)"
+									  styleName="footerLinkButton"/>
+					<s:Label text="|"/>
+					<skins:IconButton id="footerCopyleft"
+									  label="Copyleft 2011 Babelium"
+									  click="footerCopyleft_clickHandler(event)"
+									  styleName="footerLinkButton"/>
+				</s:HGroup>
+
+			</s:BorderContainer>
+		</s:HGroup>
+
+	</s:Group>
+
+</s:Group>
