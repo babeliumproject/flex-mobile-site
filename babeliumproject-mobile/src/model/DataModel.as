@@ -137,7 +137,7 @@ package model
 		[Bindable] public var savedResponseId:int;
 		
 		//Exercise uploading related data
-		[Bindable] public var server: String = "85.86.102.30";
+		[Bindable] public var server: String = "82.130.139.140";
 		[Bindable] public var red5Port: String = "1935";
 		[Bindable] public var uploadDomain:String = "http://"+server+"/";
 		[Bindable] public var streamingResourcesPath:String = "rtmp://" + server + "/oflaDemo";
