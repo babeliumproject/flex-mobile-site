@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+				xmlns:s="library://ns.adobe.com/flex/spark"
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				xmlns:hulstkamp="com.hulstkamp.*"
+				autoDrawBackground="false"
+				width="100%"
+				creationComplete="completeHandler()">
+
+	<s:layout>
+		<s:VerticalLayout paddingTop="4"
+						  paddingBottom="4"
+						  paddingLeft="8"
+						  paddingRight="8"
+						  verticalAlign="middle"/>
+	</s:layout>
+
+	<s:HGroup id="difficultyLanguageTitleBox"
+			  horizontalAlign="left"
+			  verticalAlign="middle"
+			  gap="2"
+			  width="100%">
+		<s:Image id="exerciseLanguage"
+				  width="16"
+				  height="16"
+				  source="{getFlagSource(data as EvaluationVO)}"/>
+		<s:HGroup id="avgDifficultyIndicator"
+				  styleName="roundedBorderWhiteBox">
+			<s:Label text="{getLevelCorrespondence(data.exerciseAvgDifficulty)}"
+					 styleName="boldYellowLabel"/>
+		</s:HGroup>
+		<s:Label id="exerciseTitle"
+				 text="{data.exerciseTitle}"
+				 width="100%"
+				 textAlign="left"
+				 styleName="boldLabel"/>
+	</s:HGroup>
+
+	<s:Line width="100%"
+			alpha="0.5">
+		<s:stroke>
+			<mx:SolidColorStroke weight="2"
+								 color="#aaaaaa"/>
+		</s:stroke>
+	</s:Line>
+
+	<s:HGroup width="100%"
+			  verticalAlign="middle">
+
+		<s:Image id="exerciseThumbnail"
+				  source="{getExerciseImageSource(data as EvaluationVO)}"
+				  width="120"
+				  height="90"/>
+		<s:Image id="responseThumbnail"
+				  source="{getResponseImageSource(data as EvaluationVO)}"
+				  width="120"
+				  height="90"/>
+
+
+		<s:VGroup id="selectedRoleRatingAmountBox"
+				  width="100%">
+			<s:HGroup>
+				<s:Label text="{resourceManager.getString('myResources','RECORDED_BY')+':'}"
+						 styleName="boldLabel"/>
+				<s:Label text="{data.responseUserName}"
+						 styleName="boldBlueLabel"/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text="{resourceManager.getString('myResources','RECORD_DATE')+':'}"
+						 styleName="boldLabel"/>
+				<s:Label text="{data.responseAddingDate}"
+						 styleName="boldYellowLabel"/>
+			</s:HGroup>
+			<s:HGroup verticalAlign="middle">
+				<s:Label text="{resourceManager.getString('myResources','BALORAZIOKOP')+':'}"
+						 styleName="boldLabel"/>
+				<s:Label text="{data.responseRatingAmount}"/>
+			</s:HGroup>
+
+			<s:HGroup verticalAlign="middle">
+				<s:Image id="roleIcon"
+						  source="@Embed('../../resources/images/roles.png')"
+						  toolTip="{resourceManager.getString('myResources','SELECTEDCHAR')}"/>
+				<s:Label text="{data.responseCharacterName}"/>
+			</s:HGroup>
+		</s:VGroup>
+
+	</s:HGroup>
+
+
+	<fx:Script>
+		<![CDATA[
+			import com.hulstkamp.AhRatingComponentStarSkin;
+
+			import model.DataModel;
+
+			import mx.formatters.NumberBaseRoundType;
+			import mx.formatters.NumberFormatter;
+			import mx.utils.StringUtil;
+
+			import View.common.LocaleFlagResource;
+
+			import vo.EvaluationVO;
+
+			private var _data:Object;
+			private var _creationComplete:Boolean=false;
+
+			public function completeHandler():void
+			{
+				_data=data;
+				_creationComplete=true;
+
+			}
+
+			public function getLevelCorrespondence(avgDifficulty:Number):String
+			{
+				var numFormat:NumberFormatter=new NumberFormatter();
+				numFormat.precision=0;
+				numFormat.rounding=NumberBaseRoundType.NEAREST;
+				var roundedAvgDifficulty:int=int(numFormat.format(avgDifficulty));
+				switch (roundedAvgDifficulty)
+				{
+					case 1:
+						return 'A1';
+						break;
+					case 2:
+						return 'A2';
+						break;
+					case 3:
+						return 'B1.1';
+						break;
+					case 4:
+						return 'B1.2';
+						break;
+					case 5:
+						return 'B2.1';
+						break;
+					case 6:
+						return 'B2.2';
+						break;
+					case 7:
+						return 'C1';
+						break;
+					default:
+						return '';
+						break;
+				}
+			}
+
+			public function getFlagSource(temp:EvaluationVO):String
+			{
+				return LocaleFlagResource.getFlagResource(temp.exerciseLanguage);
+			}
+
+			public function getExerciseImageSource(temp:EvaluationVO):String
+			{
+				var url:String='';
+				if (temp.exerciseSource == "Red5")
+					if (temp.exerciseThumbnailUri != 'nothumb.png')
+						url=DataModel.getInstance().thumbURL + "/" + temp.exerciseName + "/default.jpg";
+					else
+						url=DataModel.getInstance().thumbURL + '/nothumb.png';
+				else
+					url=temp.exerciseThumbnailUri;
+				return url;
+			}
+
+			public function getResponseImageSource(temp:EvaluationVO):String
+			{
+				var url:String='';
+				if (temp.responseSource == "Red5")
+					if (temp.responseThumbnailUri != 'nothumb.png')
+						url=DataModel.getInstance().thumbURL + "/" + temp.responseFileIdentifier + "/default.jpg";
+					else
+						url=DataModel.getInstance().thumbURL + '/nothumb.png';
+				else
+					url=temp.responseThumbnailUri;
+				return url;
+			}
+		]]>
+	</fx:Script>
+
+</s:ItemRenderer>
