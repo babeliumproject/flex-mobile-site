@@ -39,6 +39,7 @@ package commands.evaluation
 				dataModel.waitingForAssessmentData = resultCollection;
 			} else {
 				dataModel.waitingForAssessmentData = new ArrayCollection();
+				dataModel.responeListEmpty=true;
 			}
 			dataModel.waitingForAssessmentDataRetrieved = !dataModel.waitingForAssessmentDataRetrieved;
 		}

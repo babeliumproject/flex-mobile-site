@@ -41,6 +41,9 @@ package model
 		
 		[Bindable]public var userArrayCollection:ArrayCollection = new ArrayCollection(array);
 		
+		//Respones VideoList
+		
+		[Bindable]public var responeListEmpty:Boolean;
 		
 		//NetConnection management variables
 		[Bindable] public var netConnectionDelegate:NetConnectionDelegate;

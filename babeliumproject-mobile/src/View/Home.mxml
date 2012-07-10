@@ -30,6 +30,7 @@
 				
 				if (DataModel.getInstance().isLoggedIn == true)
 				{
+					
 					new HomepageEvent(HomepageEvent.LATEST_UPLOADED_VIDEOS).dispatch();
 				}
 			}
