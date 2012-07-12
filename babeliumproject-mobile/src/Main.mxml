@@ -5,7 +5,7 @@
 							xmlns:utils="utils.*"
 							xmlns:control="control.*"
 							xmlns:model="model.*"
-							width="100%" firstView="View.MobileProjectHome">
+							width="100%"  firstView="View.MobileProjectHome">
 	
 	
 	

@@ -28,11 +28,10 @@
 			protected function set retrieveLatestUploadedVideos(value:Boolean):void
 			{
 				
-				if (DataModel.getInstance().isLoggedIn == true)
-				{
+				
 					
 					new HomepageEvent(HomepageEvent.LATEST_UPLOADED_VIDEOS).dispatch();
-				}
+				
 			}
 			
 			protected function set handleSignedInLatestUploadedVideos(value:Boolean):void

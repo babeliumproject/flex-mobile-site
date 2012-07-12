@@ -60,19 +60,19 @@
 		<s:VGroup id="selectedRoleRatingAmountBox"
 				  width="100%">
 			<s:HGroup>
-				<s:Label text="{resourceManager.getString('myResources','RECORDED_BY')+':'}"
+				<s:Label text="Recorded by :"
 						 styleName="boldLabel"/>
 				<s:Label text="{data.responseUserName}"
 						 styleName="boldBlueLabel"/>
 			</s:HGroup>
 			<s:HGroup>
-				<s:Label text="{resourceManager.getString('myResources','RECORD_DATE')+':'}"
+				<s:Label text="Record date :"
 						 styleName="boldLabel"/>
 				<s:Label text="{data.responseAddingDate}"
-						 styleName="boldYellowLabel"/>
+						 styleName="boldYellowLabel" fontSize="14"/>
 			</s:HGroup>
 			<s:HGroup verticalAlign="middle">
-				<s:Label text="{resourceManager.getString('myResources','BALORAZIOKOP')+':'}"
+				<s:Label text="Assessment count :"
 						 styleName="boldLabel"/>
 				<s:Label text="{data.responseRatingAmount}"/>
 			</s:HGroup>
@@ -154,10 +154,12 @@
 
 			public function getExerciseImageSource(temp:EvaluationVO):String
 			{
+			
 				var url:String='';
 				if (temp.exerciseSource == "Red5")
 					if (temp.exerciseThumbnailUri != 'nothumb.png')
-						url=DataModel.getInstance().thumbURL + "/" + temp.exerciseName + "/default.jpg";
+						// u should add + "/default.jpg" in babelium web apps server
+						url=DataModel.getInstance().thumbURL + "/" + temp.exerciseName ;
 					else
 						url=DataModel.getInstance().thumbURL + '/nothumb.png';
 				else
