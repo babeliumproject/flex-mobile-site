@@ -1,0 +1,13 @@
+#Ignore config files
+build.properties
+Config.php
+
+#Ignore temp files
+*~
+*.swp
+
+#Ignore settings and compilation dirs
+.settings/
+bin-debug/
+bin-release/
+dist/
