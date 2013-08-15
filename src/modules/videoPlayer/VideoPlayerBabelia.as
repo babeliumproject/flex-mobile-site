@@ -924,10 +924,10 @@ package modules.videoPlayer
 					{
 						frontCam = Camera.getCamera(Camera.names[i]);
 						//If the camera.position property matches the constant CameraPosition.FRONT we have found the front camera
-						if (frontCam.position == CameraPosition.FRONT)
-						{
-							break;
-						}
+						//if (frontCam.position == CameraPosition.FRONT)
+						//{
+						//	break;
+						//}
 						//Make sure the camera object is set to null
 						frontCam = null;
 					}
