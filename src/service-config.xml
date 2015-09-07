@@ -16,7 +16,7 @@
 	<channels>
 		<channel-definition id="zend-endpoint"
 			class="mx.messaging.channels.AMFChannel">
-			<endpoint uri="http://babeliumproject.com/server.php" class="flex.messaging.endpoints.AMFEndpoint" />
+			<endpoint uri="http://llp.babeliumproject.com/server.php" class="flex.messaging.endpoints.AMFEndpoint" />
 		</channel-definition>
 	</channels>
 </services-config>

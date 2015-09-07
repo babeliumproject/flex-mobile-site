@@ -38,7 +38,7 @@ package business
 		
 		public function restorePass(user:LoginVO):void{
 			var service:RemoteObject = ServiceLocator.getInstance().getRemoteObject("userRO");
-			var pendingCall:AsyncToken = service.restorePass(user.name);
+			var pendingCall:AsyncToken = service.restorePass(user.username);
 			pendingCall.addResponder(responder);
 		}
 

@@ -13,7 +13,7 @@
 		<![CDATA[
 			public function emailButtonClickHandler(event:MouseEvent):void
 			{
-				navigateToURL(new URLRequest('mailto:babeliumproject@gmail.com'));
+				navigateToURL(new URLRequest('mailto:support@babeliumproject.com'));
 			}
 
 		]]>
@@ -57,7 +57,7 @@
 				 styleName="boldYellowLabel"/>
 		<s:VGroup width="100%" paddingTop="10">
 			<s:Label text="Feel free to send us your comments, questions or suggestions to:" fontSize="15"/>
-			<skins:IconButton label="babeliumproject@gmail.com" styleName="commonLinkButton"
+			<skins:IconButton label="support@babeliumproject.com" styleName="commonLinkButton"
 					  click="emailButtonClickHandler(event)"/>
 		</s:VGroup>
 	</s:VGroup>

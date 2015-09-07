@@ -23,7 +23,7 @@
 			}
 			
 			protected function footerDevelopers_clickHandler(event:MouseEvent):void{
-				navigateToURL(new URLRequest('http://code.google.com/p/babeliumproject/'), '_blank');
+				navigateToURL(new URLRequest('https://github.com/babeliumproject/flex-mobile-site'), '_blank');
 			}
 
 

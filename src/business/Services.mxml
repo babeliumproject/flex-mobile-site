@@ -7,32 +7,32 @@
 	<fx:Declarations>
 		
 		<mx:RemoteObject id="userRO"
-						 destination="empService"
+						 destination="babeliumService"
 						 showBusyCursor="true"
 						 source="User"/>
 		
 		<mx:RemoteObject id="registerRO"
-						 destination="empService"
+						 destination="babeliumService"
 						 showBusyCursor="true"
 						 source="Register"/>
 		
 		<mx:RemoteObject id="creditRO"
-						 destination="empService"
+						 destination="babeliumService"
 						 showBusyCursor="true"
 						 source="Credit"/>
 		
 		<mx:RemoteObject id="prefRO"
-						 destination="empService"
+						 destination="babeliumService"
 						 showBusyCursor="true"
 						 source="Preference"/>
 		
 		<mx:RemoteObject id="loginRO"
-						 destination="empService"
+						 destination="babeliumService"
 						 showBusyCursor="true"
 						 source="Auth"/>
 		
 		<mx:RemoteObject id="subtitleRO"
-						 destination="empService"
+						 destination="babeliumService"
 						 showBusyCursor="true"
 						 source="Subtitle"/>
 		
@@ -45,42 +45,42 @@
 		
 		
 		<mx:RemoteObject id="exerciseRO"
-						 destination="empService"
+						 destination="babeliumService"
 						 showBusyCursor="true"
 						 source="Exercise"/>
 		
 		<mx:RemoteObject id="searchRO"
-						 destination="empService"
+						 destination="babeliumService"
 						 showBusyCursor="true"
 						 source="Search"/>
 		
 		<mx:RemoteObject id="youtubeRO"
-						 destination="empService"
+						 destination="babeliumService"
 						 showBusyCursor="false"
 						 source="External"/>
 		
 		<mx:RemoteObject id="autoevaluationRO"
-						 destination="empService"
+						 destination="babeliumService"
 						 showBusyCursor="true"
 						 source="Transcription"/>
 		
 		<mx:RemoteObject id="evaluationRO"
-						 destination="empService"
+						 destination="babeliumService"
 						 showBusyCursor="true"
 						 source="Evaluation"/>
 		
 		<mx:RemoteObject id="responseRO"
-						 destination="empService"
+						 destination="babeliumService"
 						 showBusyCursor="true"
 						 source="Response"/>
 		
 		<mx:RemoteObject id="videoHistoryRO"
-						 destination="empService"
+						 destination="babeliumService"
 						 showBusyCursor="false"
 						 source="UserVideoHistory"/>
 		
 		<mx:RemoteObject id="homepageRO"
-						 destination="empService"
+						 destination="babeliumService"
 						 showBusyCursor="true"
 						 source="Home"/>
 		

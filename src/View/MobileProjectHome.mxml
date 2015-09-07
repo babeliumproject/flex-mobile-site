@@ -47,7 +47,7 @@
 			
 			public function NewUserClickHandler(event:MouseEvent):void
 			{
-				navigateToURL(new URLRequest('http://babeliumproject.com/Main.html#/register'))
+				navigateToURL(new URLRequest('http://llp.babeliumproject.com/Main.html#/register'))
 			}
 			
 		]]>
