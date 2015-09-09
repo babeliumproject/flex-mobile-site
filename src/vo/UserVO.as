@@ -5,11 +5,11 @@ package vo
 	public class UserVO
 	{
 		public var id:int;
-		public var name:String;
+		public var username:String;
 		public var email:String;
 		public var creditCount:int;
-		public var realName:String;
-		public var realSurname:String;
+		public var firstname:String;
+		public var lastname:String;
 		public var active:Boolean;
 		public var joiningDate:String;
 		public var isAdmin:Boolean;

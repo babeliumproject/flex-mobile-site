@@ -140,10 +140,10 @@ package model
 		[Bindable] public var savedResponseId:int;
 		
 		//Exercise uploading related data
-		[Bindable] public var server: String = "82.130.139.140";
+		[Bindable] public var server: String = "llp.babeliumproject.com";
 		[Bindable] public var red5Port: String = "1935";
 		[Bindable] public var uploadDomain:String = "http://"+server+"/";
-		[Bindable] public var streamingResourcesPath:String = "rtmp://" + server + "/oflaDemo";
+		[Bindable] public var streamingResourcesPath:String = "rtmp://" + server + "/babeliumllp";
 		[Bindable] public var evaluationStreamsFolder:String="evaluations";
 		[Bindable] public var responseStreamsFolder:String="responses";
 		[Bindable] public var exerciseStreamsFolder:String="exercises";

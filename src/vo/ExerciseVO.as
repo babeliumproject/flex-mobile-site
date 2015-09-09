@@ -24,12 +24,22 @@ package vo
 		public var license:String;
 		public var reference:String;
 		
+		public var ismodel:uint;
+		public var model_id: int;
+		
+		public var type: int;
+		public var situation: int;
+		public var competence: int;
+		public var lingaspect: int;
+		
 		public var avgRating:Number;
 		public var ratingCount:int; //used for bayesian average rating calculation
 		
 		public var avgDifficulty:Number;
 		
 		public var isSubtitled:uint;
+		
+		public var descriptors:*;
 		
 		public var score:Number; //is used to sort the searches
 		public var idIndex:int; //is used to delete exercises

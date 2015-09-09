@@ -21,11 +21,9 @@
 			private var mainSO:SharedObject;
 		
 			protected function set onLoginResultListener(value:Boolean):void{
-				if(value) {
-					//isSuccessfullyLogged propietatea true baldin bada
-					
+				
+				if(value) { 
 					navigator.pushView(View.Home,null,null,null);
-					
 				}
 				
 			}
@@ -39,7 +37,10 @@
 			}
 			
 			protected function set onLoginError(value1:Boolean):void{
-				if (value1){
+				// Uncomment this in a development environment
+				// navigator.pushView(View.Home,null,null,null);
+				
+				if (value1){ // Disable this condition in a development environment
 					logintext.visible=value1;
 					logintext.text=DataModel.getInstance().loginErrorMessage;
 				}

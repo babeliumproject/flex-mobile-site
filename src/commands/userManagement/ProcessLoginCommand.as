@@ -51,7 +51,7 @@ package commands.userManagement
 				DataModel.getInstance().loggedUser=user;
 				DataModel.getInstance().isSuccessfullyLogged=true;
 				DataModel.getInstance().isLoggedIn=true;
-				DataModel.getInstance().userArrayCollection.addItemAt(user.name,0);
+				DataModel.getInstance().userArrayCollection.addItemAt(user.username,0);
 				
 				//Initialize the timer that keeps this session alive
 			/*	DataModel.getInstance().eventSchedulerInstance.startKeepAlive();

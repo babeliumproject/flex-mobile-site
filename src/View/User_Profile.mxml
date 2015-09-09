@@ -43,8 +43,8 @@
 			}
 			
 			public function displayMyPersonalData():void{
-				userName.text = dataModel.loggedUser.realName;
-				userSurname.text = dataModel.loggedUser.realSurname;
+				userName.text = dataModel.loggedUser.firstname;
+				userSurname.text = dataModel.loggedUser.lastname;
 				userEmail.text = dataModel.loggedUser.email;
 			}
 			private function generateLanguageInfo(lang:UserLanguageVO):HGroup
@@ -136,13 +136,13 @@
 				<s:Label text="Real Name:"
 						 styleName="boldLabel"/>
 				<s:Label id="userName"
-						 text="{dataModel.loggedUser.realName}" textAlpha="0.6"/>
+						 text="{dataModel.loggedUser.firstname}" textAlpha="0.6"/>
 			</s:HGroup>
 			<s:HGroup paddingLeft="25" width="100%" verticalAlign="middle" >
 				<s:Label text="Real SurName:"
 						 styleName="boldLabel"/>
 				<s:Label id="userSurname"
-							text="{dataModel.loggedUser.realSurname}" textAlpha="0.6" />
+							text="{dataModel.loggedUser.lastname}" textAlpha="0.6" />
 			</s:HGroup>
 			<s:HGroup paddingLeft="25" width="100%"  verticalAlign="middle">
 				<s:Label text="Email:"
