@@ -21,7 +21,7 @@
 			
 			protected function view1_initializeHandler(event:FlexEvent):void
 			{
-				displayMyLanguages();
+				// displayMyLanguages();
 				displayMyPersonalData();
 			}
 			

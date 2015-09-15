@@ -43,14 +43,20 @@
 		<s:HGroup width="100%"
 				  verticalAlign="middle" paddingRight="16">
 			<s:Spacer width="10"/>
-			<s:Image id="groupLogo"
+			<!-- s:Image id="groupLogo"
 					 height="67"
 					 width="67"
-					 source="resources/images/ghym_logo_degr_87px.png"/>
-			<s:Label text="We are a group of researchers and students from the Basque Country's Public University (UPV/EHU) hypermedia and multimedia research group (GHyM). &#xd;&#xd; This group is primarily focused on developing innovative web-based educational applications and services. You can follow us on Twitter @babelium "
+					 source="resources/images/ghym_logo_degr_87px.png"/ -->
+			<!-- s:Label text="We are a group of researchers and students from the Basque Country's Public University (UPV/EHU) hypermedia and multimedia research group (GHyM). &#xd;&#xd; This group is primarily focused on developing innovative web-based educational applications and services. You can follow us on Twitter @babelium "
 					 width="100%"
 					 height="100%"
-					 verticalAlign="middle" fontSize="15" paddingTop="10" paddingLeft="10"  textJustify="interWord" />
+					 verticalAlign="middle" fontSize="15" paddingTop="10" paddingLeft="10"  textJustify="interWord" / -->
+			<s:BitmapImage source="resources/images/llplogo.png" height="64" width="162"/>
+			<s:Label id="llpDisclaimerText"
+					 width="100%"
+					 color="#999999"
+					 fontSize="9"
+					 text="This project has been funded with support from the European Commission. This website reflects the views only of the author, and the Commission cannot be held responsible for any use which may be made of the information contained therein. Project number 543194-LLP-1-2013-1-ES-KA2-KA2MP"/>
 		</s:HGroup>
 		<s:Spacer height="24"/>
 		<s:Label text="Contact Info"
