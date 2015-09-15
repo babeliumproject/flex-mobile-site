@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:main="modules.main.*"
+		  xmlns:evaluation="modules.evaluation.*"
+		  
+		  width="100%">
+	
+	<fx:Script>
+		<![CDATA[
+			import events.ViewChangeEvent;
+			
+			import model.DataModel;
+			
+			private function set onUserAuthenticationStatus(value:Boolean):void
+			{
+				if (DataModel.getInstance().isLoggedIn == true)
+					new ViewChangeEvent(ViewChangeEvent.VIEW_EVALUATION_SIGNED_IN).dispatch();
+				else
+					new ViewChangeEvent(ViewChangeEvent.VIEW_EVALUATION_UNSIGNED).dispatch();
+			}
+		]]>
+	</fx:Script>
+	
+	<mx:ViewStack id="evaluationViewStack"
+				  width="100%"
+				  height="100%"
+				  selectedIndex="{ DataModel.getInstance().currentEvaluationViewStackIndex }"
+				  resizeToContent="true">
+		<s:NavigatorContent id="unauthorizedUserNavContent">
+			<main:UnauthorizedNotice id="unauthorizedUser"/>
+		</s:NavigatorContent>
+		<s:NavigatorContent id="evaluationMainNavContent">
+			<evaluation:EvaluationMain id="evaluationMain"/>
+		</s:NavigatorContent>
+	</mx:ViewStack>
+	
+	<fx:Binding source="{DataModel.getInstance().isLoggedIn}"
+				destination="onUserAuthenticationStatus"/>
+	
+</s:VGroup>

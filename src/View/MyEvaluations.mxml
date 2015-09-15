@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:utils="utils.*"
+		skinClass="skins.CustomViewBackground"
+		creationComplete="view3_creationCompleteHandler(event)">
+	
+	<fx:Declarations>
+		<s:SlideViewTransition id="slideTrans" duration="800"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import events.EvaluationEvent;
+			import model.DataModel;
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import spark.events.IndexChangeEvent;
+			import utils.CustomItemRendererEvaluationTable;
+			import vo.EvaluationVO;
+			
+			[Bindable]
+			private var assessedByCurrentUserList:ArrayCollection = new ArrayCollection();
+			
+			
+			private function set ShowUser3(value:Boolean):void
+			{
+				if(value){
+					//Show message if there are not responses available
+					new AlertMsg3().open(this,true)
+					DataModel.getInstance().responeListEmpty=false;
+				}
+			}
+			
+			private function set assessedByCurrentUserRetrievedHandler(value:Boolean):void
+			{
+				var abcDataprovider:ArrayCollection=DataModel.getInstance().assessedByCurrentUserData;
+				assessedByCurrentUserList=abcDataprovider;
+			}
+			
+			protected function view3_creationCompleteHandler(event:FlexEvent):void
+			{
+				new EvaluationEvent(EvaluationEvent.GET_RESPONSES_ASSESSED_BY_CURRENT_USER).dispatch();
+			}
+			
+			protected function myEvaluatedVideosDataGroup_changeHandler(event:IndexChangeEvent):void
+			{
+				var obj:EvaluationVO=List(event.target).selectedItem as EvaluationVO;
+				navigator.pushView(View.ViewEvaluations,obj,null,slideTrans);
+				List(event.target).selectedItem = null;
+				//BabeliaBrowserManager.getInstance().parseURL(null);
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Binding source="{DataModel.getInstance().assessedByCurrentUserDataRetrieved}"
+				destination="assessedByCurrentUserRetrievedHandler"/>
+	<fx:Binding source="{DataModel.getInstance().responeListEmpty}" 
+				destination="ShowUser3"/>
+	
+	<fx:Declarations>
+		<fx:Component className="AlertMsg3">
+			<s:SkinnablePopUpContainer x="70" y="300">
+				<s:TitleWindow title="Babelium Message" close="close()">
+					<s:VGroup horizontalAlign="center" verticalAlign="middle" paddingTop="8" paddingBottom="8" paddingLeft="8" paddingRight="8" gap="5" width="100%">
+						<s:Label text="There are not Responses Available"/>
+						<s:Button label="OK" click="close()" height="40" width="60"/>
+					</s:VGroup>
+				</s:TitleWindow>
+			</s:SkinnablePopUpContainer>
+		</fx:Component>
+	</fx:Declarations>
+	
+	<s:VGroup width="100%"
+			  height="100%">
+		
+		<utils:search width="100%"/>
+		<s:VGroup horizontalAlign="center"
+				  width="100%"
+				  paddingTop="16"
+				  paddingBottom="16">
+			<s:Label text="{resourceManager.getString('myResources','RESPONSES_ASSESSED_BY_USER_LIST')}"
+					 styleName="sectionTitleLabel"
+					 id="userProfileTitleLabel"/>
+			<s:Line width="{userProfileTitleLabel.width}">
+				<s:stroke>
+					<s:SolidColorStroke weight="3"
+										color="{userProfileTitleLabel.getStyle('color')}"/>
+				</s:stroke>
+			</s:Line>
+		</s:VGroup>
+		<s:List id="myEvaluatedVideosDataGroup"
+				pageScrollingEnabled="true"
+				width="100%"
+				height="100%"
+				itemRenderer="modules.evaluation.ListItemWaitingForAssessment"
+				skinClass="skins.TransparentBgListSkin"
+				change="myEvaluatedVideosDataGroup_changeHandler(event)"
+				dataProvider="{assessedByCurrentUserList}">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+		</s:List>
+		
+	</s:VGroup>
+</s:View>
+

@@ -580,7 +580,6 @@
 				bigarren.includeInLayout=false;
 				recordingEndOptions.visible=true;
 				// Commands with selected role
-
 				// Recording mode
 				if (micOnly.selected)
 

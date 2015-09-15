@@ -38,7 +38,7 @@
 				
 				if (obj !=null)
 				{
-					//call startconetion with red5
+					//call start connection with red5
 					navigator.pushView(View.SelectedVideo,obj,null,slideTrans);
 				}
 				else
@@ -71,7 +71,7 @@
 		
 		<utils:search width="100%"/>
 		<s:VGroup horizontalAlign="center" width="100%" paddingTop="16" paddingBottom="16">
-			<s:Label text="Exercises"
+			<s:Label text="{resourceManager.getString('myResources','LABEL_EXERCISES')}"
 					 styleName="sectionTitleLabel"
 					 id="userProfileTitleLabel"/>
 			<s:Line width="{userProfileTitleLabel.width}">

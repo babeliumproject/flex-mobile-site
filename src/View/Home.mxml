@@ -28,10 +28,11 @@
 			protected function set retrieveLatestUploadedVideos(value:Boolean):void
 			{
 				
-				
+				if (DataModel.getInstance().isLoggedIn == true)
+				{
 					
 					new HomepageEvent(HomepageEvent.LATEST_UPLOADED_VIDEOS).dispatch();
-				
+				}
 			}
 			
 			protected function set handleSignedInLatestUploadedVideos(value:Boolean):void
@@ -70,7 +71,7 @@
 		
 		<utils:search width="100%"/>
 		<s:VGroup horizontalAlign="center" width="100%" paddingTop="16" paddingBottom="16">
-			<s:Label text="LatestUploadVideos"
+			<s:Label text="{resourceManager.getString('myResources','LATEST_UPLOADED_VIDEOS')}"
 					 styleName="sectionTitleLabel"
 					 id="userProfileTitleLabel"/>
 			<s:Line width="{userProfileTitleLabel.width}">

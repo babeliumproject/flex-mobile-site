@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:utils="utils.*"
+		skinClass="skins.CustomViewBackground"
+		creationComplete="view1_creationCompleteHandler(event)">
+	
+	<fx:Declarations>
+		<s:SlideViewTransition id="slideTrans" duration="800"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import events.EvaluationEvent;
+			import model.DataModel;
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import spark.events.IndexChangeEvent;
+			import vo.EvaluationVO;
+			
+			[Bindable]
+			private var waitingForAssessmentList:ArrayCollection = new ArrayCollection();
+						
+			private function set ShowUser(value:Boolean):void
+			{
+				if(value){
+					//Show message if there are not responses available
+					new AlertMsg().open(this,true)
+					DataModel.getInstance().responeListEmpty=false;
+				}
+			}
+			
+			private function set waitingAssessmentRetrievedHandler(value:Boolean):void
+			{
+				var waDataprovider:ArrayCollection=DataModel.getInstance().waitingForAssessmentData;
+				waitingForAssessmentList=waDataprovider;
+			}
+			
+			protected function view1_creationCompleteHandler(event:FlexEvent):void
+			{
+				new EvaluationEvent(EvaluationEvent.GET_RESPONSES_WAITING_ASSESSMENT).dispatch();
+			}
+			
+			protected function assessmentPendingVideosDataGroup_changeHandler(event:IndexChangeEvent):void
+			{
+				var obj:EvaluationVO=List(event.target).selectedItem as EvaluationVO;
+				navigator.pushView(View.Evaluate,obj,null,slideTrans);
+				List(event.target).selectedItem = null;
+				//BabeliaBrowserManager.getInstance().parseURL(null);
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Binding source="{DataModel.getInstance().waitingForAssessmentDataRetrieved}"
+				destination="waitingAssessmentRetrievedHandler"/>
+	<fx:Binding source="{DataModel.getInstance().responeListEmpty}" 
+				destination="ShowUser"/>
+	
+	<fx:Declarations>
+		<fx:Component className="AlertMsg">
+			<s:SkinnablePopUpContainer x="70" y="300">
+				<s:TitleWindow title="Babelium Message" close="close()">
+					<s:VGroup horizontalAlign="center" verticalAlign="middle" paddingTop="8" paddingBottom="8" paddingLeft="8" paddingRight="8" gap="5" width="100%">
+						<s:Label text="There are not Responses Available"/>
+						<s:Button label="OK" click="close()" height="40" width="60"/>
+					</s:VGroup>
+				</s:TitleWindow>
+			</s:SkinnablePopUpContainer>
+		</fx:Component>
+	</fx:Declarations>
+	
+	<s:VGroup width="100%"
+			  height="100%">
+		
+		<utils:search width="100%"/>
+		<s:VGroup horizontalAlign="center"
+				  width="100%"
+				  paddingTop="16"
+				  paddingBottom="16">
+			<!--<s:Label text="List of assessment pending responses"
+					 styleName="sectionTitleLabel"
+					 id="userProfileTitleLabel"/>-->
+			<s:Label text="{resourceManager.getString('myResources','ASSESSMENT_PENDING_RESPONSES_LIST')}"
+					 styleName="sectionTitleLabel"
+					 id="userProfileTitleLabel"/>
+			<s:Line width="{userProfileTitleLabel.width}">
+				<s:stroke>
+					<s:SolidColorStroke weight="3"
+										color="{userProfileTitleLabel.getStyle('color')}"/>
+				</s:stroke>
+			</s:Line>
+		</s:VGroup>
+		<s:List id="assessmentPendingVideosDataGroup"
+				pageScrollingEnabled="true"
+				width="100%"
+				height="100%"
+				itemRenderer="modules.evaluation.ListItemWaitingForAssessment"
+				skinClass="skins.TransparentBgListSkin"
+				change="assessmentPendingVideosDataGroup_changeHandler(event)"
+				dataProvider="{waitingForAssessmentList}">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+		</s:List>
+		
+	</s:VGroup>
+</s:View>
+

@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:utils="utils.*"
+		xmlns:skins="skins.*"
+		xmlns:exercises="modules.exercises.*"
+		xmlns:videoPlayerControls="modules.videoPlayer.controls.babelia.*"
+		xmlns:videoPlayer1="modules.videoPlayer.*"
+		xmlns:videoPlayer2="modules.videoPlayer.*"
+		xmlns:common="View.common.*"
+		xmlns:videoPlayer="modules.*"
+		skinClass="skins.CustomViewBackground"
+		initialize="view2_initializeHandler(event)"
+		viewActivate="view2_viewActivateHandler(event)"
+		viewDeactivate="view2_viewDeactivateHandler(event)"
+		removing="view2_removingHandler(event)"
+		remove="view2_removeHandler(event)"
+		creationComplete="viewEvaluations_creationCompleteHandler(event)">
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import commands.cuepointManager.RecordingOtherRoleCommand;
+			import commands.cuepointManager.ReplayResponseCommand;
+			import commands.cuepointManager.ShowHideSubtitleCommand;
+			import commands.cuepointManager.StartRecordingSelectedRoleCommand;
+			import commands.cuepointManager.StopRecordingSelectedRoleCommand;
+			
+			import control.CuePointManager;
+			
+			import events.CueManagerEvent;
+			import events.EvaluationEvent;
+			import events.ExerciseEvent;
+			import events.ExerciseRoleEvent;
+			import events.RecordingEndOptionEvent;
+			import events.ResponseEvent;
+			
+			import model.DataModel;
+			
+			import modules.videoPlayer.events.VideoPlayerEvent;
+			import modules.videoPlayer.events.babelia.RecordingEvent;
+			import modules.videoPlayer.events.babelia.StreamEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.collections.Sort;
+			import spark.collections.SortField;
+			import spark.events.ViewNavigatorEvent;
+			
+			import vo.CreditHistoryVO;
+			import vo.CueObject;
+			import vo.EvaluationVO;
+			import vo.ExerciseRoleVO;
+			import vo.ExerciseVO;
+			import vo.UserLanguageVO;
+			import vo.UserVO;
+			import vo.UserVideoHistoryVO;
+			
+			[Bindable]
+			private var _currentEvaluation:EvaluationVO;
+		
+			[Bindable]
+			private var _exerciseTitle:String;
+			
+			
+			[Bindable]
+			private var _cueManagerReady:Boolean;
+			[Bindable]
+			private var _locales:Array;
+			[Bindable]
+			private var _rolesReady:Boolean;
+			[Bindable]
+			private var _localesReady:Boolean;
+			[Bindable]
+			private var _characterNames:ArrayCollection=new ArrayCollection();
+			[Bindable]
+			private var _assessmentDetailsList:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			private var _assessersList:ArrayCollection = new ArrayCollection();
+			
+			[Bindable]
+			private var EXERCISE_NAME:String;
+			[Bindable]
+			private var RESPONSE_NAME:String;
+			
+			
+			private var _assessCheck:Boolean = false;
+			private var _canAssess:Boolean = false;
+			private var _validEvaluation:Boolean = false;
+			private var _selectedRole:String;
+			private var _roles:ArrayCollection=new ArrayCollection();
+			private var _exerciseId:int;
+			private var _exerciseName:String;
+			private var _exerciseSource:String;
+			private var _cueManager:CuePointManager=CuePointManager.getInstance();
+			
+			private var _exerciseStartedPlaying:Boolean=false;
+			public var _videoPlayerReady:Boolean=false;
+			private const EXERCISE_FOLDER:String=DataModel.getInstance().exerciseStreamsFolder;
+			private const RESPONSE_FOLDER:String=DataModel.getInstance().responseStreamsFolder;
+
+			
+			protected function view2_viewActivateHandler(event:ViewNavigatorEvent):void
+			{
+				stage.setAspectRatio(StageAspectRatio.LANDSCAPE); 
+				//onchangeview stop video
+				if (data != null)
+				{
+					_currentEvaluation=data as EvaluationVO;
+					VideoPlayer.removeEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints);
+					EXERCISE_NAME=_currentEvaluation.exerciseName as String;
+					RESPONSE_NAME=_currentEvaluation.responseFileIdentifier as String;
+					// Retrieving selected exercise information
+					_exerciseName=_currentEvaluation.exerciseName;
+					_exerciseTitle=_currentEvaluation.exerciseTitle;
+					_exerciseId=_currentEvaluation.exerciseId;
+					_selectedRole=_currentEvaluation.responseCharacterName;
+					DataModel.getInstance().selectExerciseId=_exerciseId;
+					// Need to retrieve again exercise's information
+					_rolesReady=false;
+					_localesReady=false;
+					_cueManagerReady=false;
+					
+					prepareExercise();
+					resetCueManager();
+					setupVideoPlayer();
+					setupRecordingCommands();
+					
+				}
+			}
+			
+			private function set detailsOfAssessedResponseDataRetrievedHandler(value:Boolean):void
+			{
+				var doaDataprovider:ArrayCollection=DataModel.getInstance().detailsOfAssessedResponseData;
+				_assessmentDetailsList=doaDataprovider;
+				if (_assessmentDetailsList != null) {
+					listUsersThatAssessed();
+				}
+			}
+			
+			protected function viewEvaluations_creationCompleteHandler(event:FlexEvent):void{
+				new EvaluationEvent(EvaluationEvent.DETAILS_OF_ASSESSED_RESPONSE,data as EvaluationVO,data.responseId as uint).dispatch();
+			}
+			
+			
+			private function setupRecordingCommands():void
+			{
+				var auxList:ArrayCollection=_cueManager.getCuelist();
+				if (auxList.length <= 0)
+					return;
+				
+				for each (var cueobj:CueObject in auxList)
+				{
+					if (cueobj.role != _selectedRole)
+					{
+						cueobj.setStartCommand(new RecordingOtherRoleCommand(cueobj, VideoPlayer));
+						cueobj.setEndCommand(new ShowHideSubtitleCommand(null, VideoPlayer));
+					}
+					else
+					{
+						cueobj.setStartCommand(new StartRecordingSelectedRoleCommand(cueobj, VideoPlayer));
+						cueobj.setEndCommand(new StopRecordingSelectedRoleCommand(VideoPlayer));
+					}
+				}
+				
+				_cueManagerReady=true;
+			}
+			
+			private function set onLocalesRetrieved(value:Boolean):void
+			{
+				if (value){
+					_locales=DataModel.getInstance().availableExerciseLocales;
+					if (_locales == null){
+						//availableLocales.enabled=false;
+						_localesReady=false;
+					}
+					else {
+						//availableLocales.enabled=true;
+						_localesReady=true;
+						// Preparing subtitles
+						prepareCueManager();
+					}
+					DataModel.getInstance().availableExerciseLocalesRetrieved=false;
+				}
+			}
+			
+			private function set onRolesRetrieved(value:Boolean):void
+			{
+				
+				if (value){
+					_roles=DataModel.getInstance().availableExerciseRoles.getItemAt(DataModel.RECORDING_MODULE) as ArrayCollection;
+					_characterNames.removeAll();
+					if (_roles == null){
+						
+						//availableRoles.enabled=false;
+						_rolesReady=false;
+					} else {
+						//availableRoles.enabled=true;
+						_rolesReady=true;
+						
+						for each (var role:ExerciseRoleVO in _roles)
+						{	
+							if (role.characterName != "NPC")
+								_characterNames.addItem(role.characterName);
+						}
+					}
+					DataModel.getInstance().availableExerciseRolesRetrieved.setItemAt(false, DataModel.RECORDING_MODULE);
+				}
+			}
+			
+			private function prepareExercise():void
+			{
+				// Prepare new video in VideoPlayer
+				VideoPlayer.state=VideoPlayerBabelia.PLAY_BOTH_STATE;
+				VideoPlayer.stopVideo();
+				VideoPlayer.videoSource=EXERCISE_FOLDER + '/' + EXERCISE_NAME;
+				VideoPlayer.secondSource=RESPONSE_FOLDER + '/' + RESPONSE_NAME;
+				
+				// Retrieving roles for selected exercise
+				var auxExRol:ExerciseRoleVO=new ExerciseRoleVO();
+				auxExRol.exerciseId=_exerciseId;
+				new ExerciseRoleEvent(ExerciseRoleEvent.GET_EXERCISE_ROLES, auxExRol).dispatch();
+				
+				// Retrieving available locales for selected exercise's subtitles
+				var auxEx:ExerciseVO=new ExerciseVO();
+				auxEx.id=_exerciseId;
+				new ExerciseEvent(ExerciseEvent.GET_EXERCISE_LOCALES, auxEx).dispatch();
+			}
+			
+			private function resetCueManager():void
+			{
+				_cueManager.reset();
+				VideoPlayer.removeEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints);
+				_cueManager.removeEventListener(CueManagerEvent.SUBTITLES_RETRIEVED, onSubtitlesRetrieved);
+			}
+			
+			private function prepareCueManager():void
+			{
+				var cached:Boolean=_cueManager.setVideo(DataModel.getInstance().selectExerciseId);
+				
+				_cueManager.addEventListener(CueManagerEvent.SUBTITLES_RETRIEVED, onSubtitlesRetrieved,false,0,true);
+				//_cueManager.setCuesFromSubtitleUsingLocale(availableLocales.selectedItem.code);
+				_cueManager.setCuesFromSubtitleUsingLocale(_locales[0]);
+				
+				VideoPlayer.removeEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints);
+				VideoPlayer.addEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints,false,0,true);
+			}
+			
+			private function setupVideoPlayer():void
+			{
+				VideoPlayer.addEventListener(VideoPlayerEvent.CONNECTED, onVideoPlayerReady,false,0,true);
+				VideoPlayer.addEventListener(VideoPlayerEvent.VIDEO_STARTED_PLAYING, onVideoStartedPlaying,false,0,true);
+			}
+			
+			private function onVideoPlayerReady(e:VideoPlayerEvent):void
+			{
+				_videoPlayerReady=true;
+				VideoPlayer.stopVideo();
+			}
+			
+			private function onVideoStartedPlaying(e:VideoPlayerEvent):void
+			{
+				_exerciseStartedPlaying=true;
+				if (DataModel.getInstance().isLoggedIn && _cueManagerReady && _rolesReady && _localesReady && _exerciseStartedPlaying)
+				{
+					_exerciseStartedPlaying=false;
+					var subtitlesAreUsed:Boolean=VideoPlayer.subtitlePanelVisible;
+					var subtitleId:int=_cueManager.currentSubtitle;
+					var videoData:UserVideoHistoryVO=new UserVideoHistoryVO(0, 0, _exerciseId, false, 0, '', subtitlesAreUsed, subtitleId, 0);
+					if (_exerciseId > 0 && subtitleId > 0)
+						trace("bideoIkusten");
+						//new UserVideoHistoryEvent(UserVideoHistoryEvent.STAT_EXERCISE_WATCH, videoData).dispatch();
+				}
+			}
+			
+			private function onSubtitlesRetrieved(e:CueManagerEvent):void
+			{
+				setupRecordingCommands();
+			}
+			
+			private function setupPlayCommands():void
+			{
+				var auxList:ArrayCollection=_cueManager.getCuelist();
+				if (auxList.length <= 0)
+					return;
+				prepareRoles(auxList);
+				for each (var cueobj:CueObject in auxList)
+				{
+					cueobj.setStartCommand(new ShowHideSubtitleCommand(cueobj, VideoPlayer));
+					cueobj.setEndCommand(new ShowHideSubtitleCommand(null, VideoPlayer));
+				}
+				_cueManagerReady=true;
+				
+			}
+			
+			private function prepareRoles(subtitleLines:ArrayCollection):void
+			{
+				_characterNames.removeAll();
+				_roles.removeAll();
+				if (subtitleLines.length <= 0)
+				{
+					//availableRoles.enabled=false;
+					_rolesReady=false;
+				}
+				else
+				{
+					var tmpRoles:ArrayCollection=new ArrayCollection();
+					for each (var cueobj:CueObject in subtitleLines)
+					{
+						if (cueobj.role != "NPC" && !tmpRoles.contains(cueobj.role))
+						{
+							tmpRoles.addItem(cueobj.role);
+							_roles.addItem(new ExerciseRoleVO(cueobj.roleId, _exerciseId, cueobj.role));
+						}
+					}
+					
+					var sort:Sort=new Sort();
+					var sortfield:SortField=new SortField(null, false);
+					sort.fields=[sortfield];
+					addStyleClient(sortfield);
+					tmpRoles.sort=sort;
+					tmpRoles.refresh();
+					
+					_characterNames.addAll(tmpRoles);
+					_characterNames.refresh();
+					//availableRoles.enabled=true;
+					_rolesReady=true;
+					/*if (_characterNames.length == 2)
+					{
+						role1.label=_characterNames[0];
+						role2.label=_characterNames[1];
+					}
+					else
+					{
+						role1.label=_characterNames[0];
+						role2.visible=false;
+					}*/
+				}
+			}
+			
+			protected function view2_viewDeactivateHandler(event:ViewNavigatorEvent):void
+			{
+				userList.dataProvider.removeAll();
+				trace("viewDeactivate");
+				
+			}
+			
+			protected function view2_removingHandler(event:ViewNavigatorEvent):void
+			{
+				//Clear all the active references to the videoplayer and cuemanager object 
+				//so that it can actually be unferenced and collected by the internal garbage collector.
+				//Since these objects are going to be constructed/destructed many times the use of "weak reference" 
+				//in the event listeners is also suggested, so that there is no obstacles for the gc.
+				VideoPlayer.endVideo(); // Stop video
+				VideoPlayer.removeEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints);
+				_cueManager.removeEventListener(CueManagerEvent.SUBTITLES_RETRIEVED, onSubtitlesRetrieved);
+				VideoPlayer=null;
+				_cueManager=null;
+			}
+			
+			protected function view2_removeHandler(event:FlexEvent):void
+			{
+				trace("remove");
+			}
+			
+			protected function view2_initializeHandler(event:FlexEvent):void
+			{
+				//view set to landscape
+				stage.setAspectRatio(StageAspectRatio.LANDSCAPE);
+				
+				// TODO Auto-generated method stub
+				
+			}
+			
+			private function listUsersThatAssessed():void{
+				_assessersList.removeAll();
+				for (var i:int=0; i<_assessmentDetailsList.length; i++){
+					_assessersList.addItemAt(_assessmentDetailsList[i].userName,i); //Add user names to the list which will be displayed
+				}
+			}
+			
+			private function changeUser(e:Event):void{
+				//Write code to load and show certain user's evaluation data
+				var index:uint = e.currentTarget.selectedIndex;
+				punt1.text = _assessmentDetailsList[index].intonationScore;
+				punt2.text = _assessmentDetailsList[index].fluencyScore;
+				punt3.text = _assessmentDetailsList[index].rhythmScore;
+				punt4.text = _assessmentDetailsList[index].spontaneityScore;
+				punt5.text = _assessmentDetailsList[index].overallScore;
+				textCommentArea.text = _assessmentDetailsList[index].comment;
+				assessmentDate.text = _assessmentDetailsList[index].addingDate;
+				userButton.label = _assessmentDetailsList[index].userName;
+				userButton.closeDropDown();
+			}
+									
+		]]>
+	</fx:Script>
+	
+	<!-- <fx:Binding/>
+	-->
+	
+	<fx:Binding source="{DataModel.getInstance().availableExerciseLocalesRetrieved}"
+				destination="this.onLocalesRetrieved"/>
+	<fx:Binding source="{DataModel.getInstance().detailsOfAssessedResponseDataRetrieved}"
+				destination="detailsOfAssessedResponseDataRetrievedHandler"/>
+	
+	<s:VGroup id="mainScreen" x="0" y="0" width="100%" height="100%" horizontalAlign="contentJustify"
+			  verticalAlign="top">
+		<utils:search id="searchScreen"/>
+		<s:HGroup id="videoScreen" height="50%" minWidth="0" minHeight="0" horizontalAlign="center">
+			
+			<videoPlayer1:VideoPlayerBabelia id="VideoPlayer"
+											 skin="white"
+											 seek="true"
+											 subtitles="true"
+											 autoPlay="false"
+											 autoScale="true"
+											 width="{this.width/2.5}"
+											 height="{this.height/2}"
+											 streamSource="{DataModel.getInstance().streamingResourcesPath}"
+											 controlsEnabled="true"/>
+			<!-- <s:HGroup id="recording_options" width="100%" minWidth="0" minHeight="0"
+					  paddingLeft="16" verticalAlign="top">
+			</s:HGroup> -->
+		</s:HGroup>
+		<s:HGroup id="userDateScreen" height="7%" horizontalAlign="left" verticalAlign="middle">
+			<s:HGroup width="50%" height="5%" horizontalAlign="center" verticalAlign="middle">
+				<s:Label id="assessedBy" text="{resourceManager.getString('myResources','LABEL_USER_NAME')}"/>
+				<s:CalloutButton id="userButton" y="-13" height="75%" label="{resourceManager.getString('myResources','LABEL_USER_NAME')}">
+					<s:VGroup paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" horizontalAlign="center">
+						<s:List id="userList" change="changeUser(event)" dataProvider="{_assessersList}"
+								/>
+					</s:VGroup>
+				</s:CalloutButton>
+			</s:HGroup>
+			<s:HGroup width="50%" height="5%" horizontalAlign="center" verticalAlign="middle">
+				<s:Label id="assessmentDateLabel" text="{resourceManager.getString('myResources','EVALUATION_DATE')}"/>
+				<s:Label id="assessmentDate"/>
+			</s:HGroup>	
+		</s:HGroup>
+		<s:HGroup id="evalScreen" width="100%" height="30%" horizontalAlign="center">
+			<s:HGroup id="scoresScreen" width="35%" height="100%" verticalAlign="contentJustify">
+				<s:VGroup width="50%" height="100%" horizontalAlign="center"
+						  verticalAlign="middle">
+					<s:Label height="18%" text="{resourceManager.getString('myResources','LABEL_INTONATION_SCORE')}"/>
+					<s:Label height="18%" text="{resourceManager.getString('myResources','LABEL_FLUENCY_SCORE')}"/>
+					<s:Label height="18%" text="{resourceManager.getString('myResources','LABEL_RHYTHM_SCORE')}"/>
+					<s:Label height="18%" text="{resourceManager.getString('myResources','LABEL_SPONTANEITY_SCORE')}"/>
+					<s:Label height="18%" text="{resourceManager.getString('myResources','LABEL_OVERALL_SCORE')}"/>
+				</s:VGroup>
+				<s:VGroup width="50%" height="100%" horizontalAlign="center">
+					<s:Label id="punt1" width="80%" height="18%" text=""/>
+					<s:Label id="punt2" width="80%" height="18%" text=""/>
+					<s:Label id="punt3" width="80%" height="18%" text=""/>
+					<s:Label id="punt4" width="80%" height="18%" text=""/>
+					<s:Label id="punt5" width="80%" height="18%" text=""/>
+				</s:VGroup>
+			</s:HGroup>
+			<s:HGroup id="commentsScreen" width="65%" height="100%" horizontalAlign="left">
+				<s:VGroup width="40%" height="100%">
+					<s:Label id="textComment" width="100%" height="15%"
+							 text="{resourceManager.getString('myResources','LABEL_TEXT_COMMENT')}"
+							 textAlign="center"/>	
+					<s:Label id="textCommentArea" width="100%" height="80%"/>
+				</s:VGroup>
+				<s:VGroup width="60%" height="100%">
+					<s:Label id="videoComment" width="100%" text="{resourceManager.getString('myResources','LABEL_VIDEO_COMMENT')}"
+							 textAlign="center"/>
+					<!--<videoPlayer1:VideoPlayerBabelia/>-->
+				</s:VGroup>
+			</s:HGroup>
+		</s:HGroup>
+	</s:VGroup>
+					
+</s:View>

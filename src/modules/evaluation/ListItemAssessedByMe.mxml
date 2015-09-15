@@ -71,11 +71,18 @@
 				<s:Label text="{data.responseAddingDate}"
 						 styleName="boldYellowLabel"/>
 			</s:HGroup>
+			<s:HGroup>
+				<s:Label text="{resourceManager.getString('myResources','EVALUATION_DATE')+':'}"
+						 styleName="boldLabel"/>
+				<s:Label text="{data.responseAddingDate}"
+						 styleName="boldYellowLabel"/>
+			</s:HGroup>
 			<s:HGroup verticalAlign="middle">
 				<s:Label text="{resourceManager.getString('myResources','BALORAZIOKOP')+':'}"
 						 styleName="boldLabel"/>
 				<s:Label text="{data.responseRatingAmount}"/>
 			</s:HGroup>
+			
 
 			<s:HGroup verticalAlign="middle">
 				<s:Image id="roleIcon"

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:utils="utils.*"
+		xmlns:skins="skins.*"
+		skinClass="skins.CustomViewBackground" initialize="view1_initializeHandler(event)">
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import model.DataModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.events.ResourceEvent;
+			
+			[Bindable]
+			private var dataModel:DataModel=DataModel.getInstance();
+			
+			protected function view1_initializeHandler(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function cb_creationCompleteHandler(event:FlexEvent):void{
+				// get data from the server
+				
+			}
+			
+			protected function resourcesChangedHandler(event:FlexEvent):void{
+				// get data from the server
+				resourceManager.update();
+				resourceManager.removeEventListener(ResourceEvent.COMPLETE,resourcesChangedHandler);
+				resourceManager.removeEventListener(ResourceEvent.ERROR,resourcesErrorHandler);
+				
+			}
+			
+			protected function resourcesErrorHandler(event:FlexEvent):void{
+				// get data from the server
+				trace("Error changing language");
+				new langSetErrorAlert().open(this,true);
+				resourceManager.removeEventListener(ResourceEvent.COMPLETE,resourcesChangedHandler);
+				resourceManager.removeEventListener(ResourceEvent.ERROR,resourcesErrorHandler);
+			}
+			
+			
+			protected function list_changeHandler(event:Event):void{
+				
+				resourceManager.addEventListener(ResourceEvent.COMPLETE,resourcesChangedHandler);
+				resourceManager.addEventListener(ResourceEvent.ERROR,resourcesErrorHandler);
+				
+				switch(list.selectedItem){
+					case "Spanish (Spain)":
+						//Set spanish language
+						resourceManager.localeChain = [ "es_ES" ];
+						break;
+					case "English (United States)":
+						//Set english language
+						resourceManager.localeChain = [ "en_US" ];
+						break;
+					case "Basque":
+						//Set basque language
+						resourceManager.localeChain = [ "eu_ES" ];
+						break;
+					case "French (France)":
+						//Set french language
+						resourceManager.localeChain = [ "fr_FR" ];
+						break;
+					case "German (Germany)":
+						//Set german language
+						resourceManager.localeChain = [ "de_DE" ];
+						break;
+					navigator.popToFirstView(null);
+					
+				}
+				
+				cb.label = list.selectedItem;
+				cb.closeDropDown();
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<fx:Component className="langSetErrorAlert">
+			<s:SkinnablePopUpContainer x="70" y="300">
+				<s:TitleWindow title="Babelium Message" close="close()">
+					<s:VGroup horizontalAlign="center" verticalAlign="middle" paddingTop="8" paddingBottom="8" paddingLeft="8" paddingRight="8" gap="5" width="100%">
+						<s:Label text="{resourceManager.getString('myResources','ERROR_WHILE_CHANGING_LANGUAGE')}"/>
+						<s:Button label="OK" click="close()" height="40" width="60"/>
+					</s:VGroup>
+				</s:TitleWindow>
+			</s:SkinnablePopUpContainer>
+		</fx:Component>
+	</fx:Declarations>
+	
+	
+	
+	
+	<s:VGroup height="100%" width="100%">
+		<s:HGroup id="search" height="10%" width="100%" verticalAlign="top" >
+			<utils:search width="100%" />
+		</s:HGroup>
+		
+		<s:HGroup id="section_title" height="170" width="100%"  verticalAlign="middle" horizontalAlign="center">
+			<s:Label id="userProfileTitleLabel" width="40%" styleName="sectionTitleLabel"
+					 text="{resourceManager.getString('myResources','PROMPT_SELECT_LANGUAGE')}"
+					 textAlign="center"/>
+			<s:CalloutButton id="cb" width="55%" label="..." calloutDestructionPolicy="never"
+							 creationComplete="cb_creationCompleteHandler(event)"
+							 verticalPosition="after">
+				<s:calloutLayout>
+					<s:VerticalLayout paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" horizontalAlign="center" gap="5">
+					</s:VerticalLayout>
+				</s:calloutLayout>
+				<s:calloutContent >
+					<s:VGroup paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" horizontalAlign="center">
+						<s:List id="list" dataProvider="{model.DataModel.getInstance().selectLanguageArrayCollection}"  width="250" change="list_changeHandler(event)"/>
+					</s:VGroup>
+				</s:calloutContent>
+			</s:CalloutButton>
+			
+		</s:HGroup>
+	</s:VGroup>
+	
+	
+</s:View>

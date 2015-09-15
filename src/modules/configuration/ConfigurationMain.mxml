@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:common="view.common.*"
+		  xmlns:skins="skins.*"
+		  xmlns:configuration="modules.configuration.*"
+		  xmlns:mod3="modules.configuration.bandwidth.*"
+		  width="100%"
+		  minWidth="1000"
+		  creationComplete="init()">
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.utils.Timer;
+			
+			import model.DataModel;
+			
+			import modules.configuration.ConfigurationResultEvent;
+			import modules.configuration.ShowStatusMessage;
+			import modules.main.Body;
+			
+			import mx.events.IndexChangedEvent;
+			
+			//Result panel´s Timers
+			public var timerMic:Timer;
+			public var timerCam:Timer;
+			public var timerBW:Timer;
+			
+			private var permissionStatus:Boolean=false;
+			
+			private function init():void
+			{
+				configurationViewStack.addEventListener(IndexChangedEvent.CHANGE, childChange);
+				timerMic=new Timer(500, 0);
+				timerCam=new Timer(500, 0);
+				timerBW=new Timer(500, 0);
+				timerMic.addEventListener(TimerEvent.TIMER, onTimerMic);
+				timerCam.addEventListener(TimerEvent.TIMER, onTimerCam);
+				timerBW.addEventListener(TimerEvent.TIMER, onTimerBW);
+				if (Camera.names.length > 0)
+				{ //El usuario dispone de webcam
+					webCamCheck.addEventListener(ConfigurationResultEvent.WEBCAM_RESULT, webcamResult);
+					webCamCheck.addEventListener(ConfigurationResultEvent.MICROPHONE_RESULT, microphoneResult);
+					webCamCheck.addEventListener(ShowStatusMessage.MIC_MESSAGE, micStatusMessage);
+				}
+				else
+				{ //El usuario no dispone de webcam
+					correctIncorrectIcon(webCamStatusIcon, false);
+				}
+			}
+			
+			/*Gestion de los 3 submodulos*/
+			private function childChange(e:IndexChangedEvent):void
+			{
+				var indice:Number=e.newIndex;
+				if (indice == 1)
+				{ //Microphone module
+					if (permissionStatus)
+					{
+						micCheck.statusText.text=resourceManager.getString('myResources', 'CONFIGURATION_NO_PERMISSIONS');
+						micCheck.statusText.visible=true;
+					}
+					if (Microphone.names.length > 0)
+					{ //El usuario dispone de microfono
+						micCheck.addEventListener(ConfigurationResultEvent.MICROPHONE_RESULT, microphoneResult);
+						micCheck.addEventListener(ConfigurationResultEvent.WEBCAM_RESULT, webcamResult);
+						micCheck.addEventListener(ShowStatusMessage.CAM_MESSAGE, webCamStatusMessage);
+					}
+					else
+					{ //El usuario no dispone de microfono
+						correctIncorrectIcon(microphoneStatusIcon, false);
+					}
+				}
+				if (indice == 2)
+				{ //Bandwidth module
+					bandwidthCheck.addEventListener(ConfigurationResultEvent.BANDWIDTH_RESULT, bandwidthResult);
+				}
+			}
+			
+			/*Funciones para el control de los resultados*/
+			public function webcamResult(e:ConfigurationResultEvent):void
+			{
+				checkResultBox.includeInLayout=true;
+				checkResultBox.visible=true;
+				timerCam.start();
+				e.status ? correctIncorrectIcon(webCamStatusIcon, true) : correctIncorrectIcon(webCamStatusIcon, false);
+			}
+			
+			public function microphoneResult(e:ConfigurationResultEvent):void
+			{
+				checkResultBox.includeInLayout=true;
+				checkResultBox.visible=true;
+				timerMic.start();
+				e.status ? correctIncorrectIcon(microphoneStatusIcon, true) : correctIncorrectIcon(microphoneStatusIcon, false);
+			}
+			
+			public function bandwidthResult(e:ConfigurationResultEvent):void
+			{
+				checkResultBox.includeInLayout=true;
+				checkResultBox.visible=true;
+				timerBW.start();
+				e.status ? correctIncorrectIcon(bandwidthStatusIcon, true) : correctIncorrectIcon(bandwidthStatusIcon, false);
+			}
+			
+			/*Funciones timers para el control de los resultados*/
+			public function onTimerMic(e:TimerEvent):void
+			{
+				if (timerMic.currentCount < 8)
+				{ //4 parpadeos
+					microphoneStatus.visible=!microphoneStatus.visible;
+				}
+				else
+				{ //Configurar el estado inicial
+					timerMic.reset();
+					microphoneStatus.visible=true;
+				}
+			}
+			
+			public function onTimerCam(e:TimerEvent):void
+			{
+				if (timerCam.currentCount < 8)
+				{ //4 parpadeos
+					webCamStatus.visible=!webCamStatus.visible;
+				}
+				else
+				{ //Configurar el estado inicial
+					timerCam.reset();
+					webCamStatus.visible=true;
+				}
+			}
+			
+			public function onTimerBW(e:TimerEvent):void
+			{
+				if (timerBW.currentCount < 8)
+				{ //4 parpadeos
+					bandwidthStatus.visible=!bandwidthStatus.visible;
+				}
+				else
+				{ //Configurar el estado inicial
+					timerBW.reset();
+					bandwidthStatus.visible=true;
+				}
+			}
+			
+			/*Funciones para el control de refresh*/
+			private function refreshMic():void
+			{
+				if (Microphone.names.length > 0)
+				{ //El usuario ha conectado su microfono
+					micCheck.addEventListener(ConfigurationResultEvent.MICROPHONE_RESULT, microphoneResult);
+				}
+			}
+			
+			private function refreshWebCam():void
+			{
+				if (Camera.names.length > 0)
+				{ //El usuario ha conectado su webcam
+					webCamCheck.addEventListener(ConfigurationResultEvent.WEBCAM_RESULT, webcamResult);
+				}
+			}
+			
+			//Funciones para el control de los mensajes de falta de permisos
+			private function webCamStatusMessage(ev:ShowStatusMessage):void
+			{
+				webCamCheck.statusText.text=resourceManager.getString('myResources', 'CONFIGURATION_NO_PERMISSIONS');
+				webCamCheck.statusText.visible=true;
+			}
+			
+			private function micStatusMessage(ev:ShowStatusMessage):void
+			{
+				permissionStatus=true;
+			}
+			
+			private function correctIncorrectIcon(component:Image, flag:Boolean):void
+			{
+				component.source=flag ? 'resources/images/tick.png' : 'resources/images/cross.png';
+			}
+		]]>
+	</fx:Script>
+	
+	
+	<s:BorderContainer styleName="sectionInfoBox"
+					   minHeight="0"
+					   minWidth="1000"
+					   width="100%">
+		<s:layout>
+			<s:VerticalLayout paddingTop="16"/>
+		</s:layout>
+		<s:Label text="{resourceManager.getString('myResources','LABEL_CONFIGURATION')}"
+				 styleName="sectionInfoTitleLabel"
+				 paddingLeft="16"
+				 paddingRight="16"/>
+		<s:Label text="{resourceManager.getString('myResources','CONFIGURATION_SECTION_DESCRIPTION')}"
+				 paddingLeft="16"
+				 paddingRight="16"
+				 width="950"/>
+		<s:HGroup horizontalAlign="right"
+				  width="100%"
+				  verticalAlign="bottom"
+				  gap="0">
+			<skins:HorizontalSeparatorLine width="100%"/>
+			<s:TabBar dataProvider="{configurationViewStack}"
+					  skinClass="skins.AccountTabBarSkin"
+					  cornerRadius="8"/>
+			<skins:HorizontalSeparatorLine width="16"/>
+		</s:HGroup>
+	</s:BorderContainer>
+	
+	<s:HGroup id="checkResultBox"
+			  styleName="configResultBox"
+			  includeInLayout="false"
+			  visible="false"
+			  width="100%"
+			  horizontalAlign="right"
+			  paddingTop="16"
+			  paddingLeft="16"
+			  paddingRight="16">
+		<s:HGroup id="webCamStatus"
+				  verticalAlign="middle">
+			<s:Label text="{resourceManager.getString('myResources', 'WEBCAM')+':'}"
+					 id="webCamStatusText"
+					 visible="true"/>
+			<mx:Image id="webCamStatusIcon"/>
+		</s:HGroup>
+		<s:HGroup id="microphoneStatus"
+				  verticalAlign="middle">
+			<s:Label text="{resourceManager.getString('myResources', 'MICROPHONE')+':'}"
+					 id="microphoneStatusText"/>
+			<mx:Image id="microphoneStatusIcon"/>
+		</s:HGroup>
+		
+		<s:HGroup id="bandwidthStatus"
+				  verticalAlign="middle">
+			<s:Label text="{resourceManager.getString('myResources', 'BANDWIDTH')+':'}"
+					 id="bandwidthStatusText"/>
+			<mx:Image id="bandwidthStatusIcon"/>
+		</s:HGroup>
+	</s:HGroup>
+	
+	<s:VGroup width="100%"
+			  height="100%"
+			  paddingTop="16"
+			  paddingLeft="16"
+			  paddingRight="16"
+			  paddingBottom="16">
+		
+		<mx:ViewStack id="configurationViewStack"
+					  width="100%"
+					  height="100%"
+					  creationPolicy="all"
+					  resizeToContent="true">
+			
+			<s:NavigatorContent label="{resourceManager.getString('myResources','LABEL_WEBCAM_SETUP')}">
+				<configuration:WebcamCheck id="webCamCheck"/>
+			</s:NavigatorContent>
+			
+			<s:NavigatorContent label="{resourceManager.getString('myResources','LABEL_MIC_SETUP')}">
+				<configuration:MicrophoneCheck id="micCheck"/>
+			</s:NavigatorContent>
+			
+			<s:NavigatorContent label="{resourceManager.getString('myResources','LABEL_BANDWIDTH_CHECK')}">
+				<mod3:connectionCheck id="bandwidthCheck"/>
+			</s:NavigatorContent>
+		</mx:ViewStack>
+		
+	</s:VGroup>
+	
+</s:VGroup>

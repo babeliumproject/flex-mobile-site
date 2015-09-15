@@ -2,59 +2,518 @@
 <s:View xmlns:fx="http://ns.adobe.com/mxml/2009"
 		xmlns:s="library://ns.adobe.com/flex/spark"
 		xmlns:utils="utils.*"
+		xmlns:skins="skins.*"
+		xmlns:exercises="modules.exercises.*"
+		xmlns:videoPlayerControls="modules.videoPlayer.controls.babelia.*"
+		xmlns:videoPlayer1="modules.videoPlayer.*"
+		xmlns:videoPlayer2="modules.videoPlayer.*"
+		xmlns:common="View.common.*"
+		xmlns:videoPlayer="modules.*"
 		skinClass="skins.CustomViewBackground"
-		creationComplete="view1_creationCompleteHandler(event)">
+		initialize="view2_initializeHandler(event)"
+		viewActivate="view2_viewActivateHandler(event)"
+		viewDeactivate="view2_viewDeactivateHandler(event)"
+		removing="view2_removingHandler(event)"
+		remove="view2_removeHandler(event)">
+	
 	<fx:Script>
 		<![CDATA[
+			import commands.cuepointManager.RecordingOtherRoleCommand;
+			import commands.cuepointManager.ReplayResponseCommand;
+			import commands.cuepointManager.ShowHideSubtitleCommand;
+			import commands.cuepointManager.StartRecordingSelectedRoleCommand;
+			import commands.cuepointManager.StopRecordingSelectedRoleCommand;
+			
+			import control.CuePointManager;
+			
+			import events.CueManagerEvent;
 			import events.EvaluationEvent;
+			import events.ExerciseEvent;
+			import events.ExerciseRoleEvent;
+			import events.RecordingEndOptionEvent;
+			import events.ResponseEvent;
 			
 			import model.DataModel;
+			
+			import modules.videoPlayer.events.VideoPlayerEvent;
+			import modules.videoPlayer.events.babelia.RecordingEvent;
+			import modules.videoPlayer.events.babelia.StreamEvent;
 			
 			import mx.collections.ArrayCollection;
 			import mx.events.FlexEvent;
 			
-			import utils.CustomItemRendererEvaluationTable;
+			import spark.collections.Sort;
+			import spark.collections.SortField;
+			import spark.events.ViewNavigatorEvent;
 			
+			import vo.CreditHistoryVO;
+			import vo.CueObject;
+			import vo.EvaluationVO;
+			import vo.ExerciseRoleVO;
+			import vo.ExerciseVO;
+			import vo.UserLanguageVO;
+			import vo.UserVO;
+			import vo.UserVideoHistoryVO;
 			
 			[Bindable]
-			private var waitingForAssessmentList:ArrayCollection = new ArrayCollection();
+			private var _currentEvaluation:EvaluationVO;
+		
+			[Bindable]
+			private var _exerciseTitle:String;
+			
+			[Bindable]
+			private var _cueManagerReady:Boolean;
+			[Bindable]
+			private var _locales:Array;
+			[Bindable]
+			private var _rolesReady:Boolean;
+			[Bindable]
+			private var _localesReady:Boolean;
+			[Bindable]
+			private var _characterNames:ArrayCollection=new ArrayCollection();
+			[Bindable]
+			private var EXERCISE_NAME:String;
+			[Bindable]
+			private var RESPONSE_NAME:String;
 			
 			
-			private function set ShowUser(value:Boolean):void
+			private var _assessCheck:Boolean = false;
+			private var _canAssess:Boolean = false;
+			private var _validEvaluation:Boolean = false;
+			private var _selectedRole:String;
+			private var _roles:ArrayCollection=new ArrayCollection();
+			private var _exerciseId:int;
+			private var _exerciseName:String;
+			private var _exerciseSource:String;
+			private var _cueManager:CuePointManager=CuePointManager.getInstance();
+			
+			private var _exerciseStartedPlaying:Boolean=false;
+			public var _videoPlayerReady:Boolean=false;
+			private const EXERCISE_FOLDER:String=DataModel.getInstance().exerciseStreamsFolder;
+			private const RESPONSE_FOLDER:String=DataModel.getInstance().responseStreamsFolder;
+
+			
+			protected function view2_viewActivateHandler(event:ViewNavigatorEvent):void
 			{
-				if(value){
-					//Show message if there are not responses available
-					new AlertMsg().open(this,true)
-					DataModel.getInstance().responeListEmpty=false;
+				stage.setAspectRatio(StageAspectRatio.LANDSCAPE); 
+				//onchangeview stop video
+				if (data != null)
+				{
+					//setupResponseOptions();
+					_currentEvaluation=data as EvaluationVO;
+					VideoPlayer.removeEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints);
+					EXERCISE_NAME=_currentEvaluation.exerciseName as String;
+					RESPONSE_NAME=_currentEvaluation.responseFileIdentifier as String;
 					
+					// Retrieving selected exercise information
+					_exerciseName=_currentEvaluation.exerciseName;
+					_exerciseTitle=_currentEvaluation.exerciseTitle;
+					_exerciseId=_currentEvaluation.exerciseId;
+					_selectedRole=_currentEvaluation.responseCharacterName;
+					DataModel.getInstance().selectExerciseId=_exerciseId;
+					// Need to retrieve again exercise's information
+					_rolesReady=false;
+					_localesReady=false;
+					_cueManagerReady=false;
+					
+					prepareExercise();
+					resetCueManager();
+					setupVideoPlayer();
+					setupRecordingCommands();
+				}
+			}
+			
+			private function setupRecordingCommands():void
+			{
+				var auxList:ArrayCollection=_cueManager.getCuelist();
+				if (auxList.length <= 0)
+					return;
+				
+				for each (var cueobj:CueObject in auxList)
+				{
+					if (cueobj.role != _selectedRole)
+					{
+						cueobj.setStartCommand(new RecordingOtherRoleCommand(cueobj, VideoPlayer));
+						cueobj.setEndCommand(new ShowHideSubtitleCommand(null, VideoPlayer));
+					}
+					else
+					{
+						cueobj.setStartCommand(new StartRecordingSelectedRoleCommand(cueobj, VideoPlayer));
+						cueobj.setEndCommand(new StopRecordingSelectedRoleCommand(VideoPlayer));
+					}
 				}
 				
-				
-			}
-			private function set waitingAssessmentRetrievedHandler(value:Boolean):void
-			{
-				var waDataprovider:ArrayCollection=DataModel.getInstance().waitingForAssessmentData;
-				waitingForAssessmentList=waDataprovider;
+				_cueManagerReady=true;
 			}
 			
-			protected function view1_creationCompleteHandler(event:FlexEvent):void
+			private function set onLocalesRetrieved(value:Boolean):void
 			{
-				new EvaluationEvent(EvaluationEvent.GET_RESPONSES_WAITING_ASSESSMENT).dispatch();
+				if (value)
+				{
+					
+					_locales=DataModel.getInstance().availableExerciseLocales;
+					if (_locales == null)
+					{
+						//availableLocales.enabled=false;
+						_localesReady=false;
+					}
+					else
+					{
+						//availableLocales.enabled=true;
+						_localesReady=true;
+						
+						// Preparing subtitles
+						
+						prepareCueManager();
+					}
+					
+					DataModel.getInstance().availableExerciseLocalesRetrieved=false;
+				}
 			}
+						
+			private function set onRolesRetrieved(value:Boolean):void{
+				if (value) {
+					_roles=DataModel.getInstance().availableExerciseRoles.getItemAt(DataModel.RECORDING_MODULE) as ArrayCollection;
+					_characterNames.removeAll();
+					if (_roles == null){
+						//availableRoles.enabled=false;
+						_rolesReady=false;
+					} else {
+						//availableRoles.enabled=true;
+						_rolesReady=true;
+						for each (var role:ExerciseRoleVO in _roles){
+							if (role.characterName != "NPC")
+								_characterNames.addItem(role.characterName);
+						}
+					}
+					DataModel.getInstance().availableExerciseRolesRetrieved.setItemAt(false, DataModel.RECORDING_MODULE);
+				}
+			}
+			
+			private function prepareExercise():void
+			{
+				// Prepare new video in VideoPlayer
+				VideoPlayer.state=VideoPlayerBabelia.PLAY_BOTH_STATE;
+				VideoPlayer.stopVideo();
+				VideoPlayer.videoSource=EXERCISE_FOLDER + '/' + EXERCISE_NAME;
+				VideoPlayer.secondSource=RESPONSE_FOLDER + '/' + RESPONSE_NAME;
+				
+				// Retrieving roles for selected exercise
+				var auxExRol:ExerciseRoleVO=new ExerciseRoleVO();
+				auxExRol.exerciseId=_exerciseId;
+				new ExerciseRoleEvent(ExerciseRoleEvent.GET_EXERCISE_ROLES, auxExRol).dispatch();
+				
+				// Retrieving available locales for selected exercise's subtitles
+				var auxEx:ExerciseVO=new ExerciseVO();
+				auxEx.id=_exerciseId;
+				new ExerciseEvent(ExerciseEvent.GET_EXERCISE_LOCALES, auxEx).dispatch();
+			}
+			
+			private function resetCueManager():void
+			{
+				_cueManager.reset();
+				VideoPlayer.removeEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints);
+				_cueManager.removeEventListener(CueManagerEvent.SUBTITLES_RETRIEVED, onSubtitlesRetrieved);
+			}
+			
+			private function prepareCueManager():void
+			{
+				var cached:Boolean=_cueManager.setVideo(DataModel.getInstance().selectExerciseId);
+				
+				_cueManager.addEventListener(CueManagerEvent.SUBTITLES_RETRIEVED, onSubtitlesRetrieved,false,0,true);
+				//_cueManager.setCuesFromSubtitleUsingLocale(availableLocales.selectedItem.code);
+				_cueManager.setCuesFromSubtitleUsingLocale(_locales[0]);
+				
+				VideoPlayer.removeEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints);
+				VideoPlayer.addEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints,false,0,true);
+			}
+			
+			private function setupVideoPlayer():void
+			{
+				VideoPlayer.addEventListener(VideoPlayerEvent.CONNECTED, onVideoPlayerReady,false,0,true);
+				VideoPlayer.addEventListener(VideoPlayerEvent.VIDEO_STARTED_PLAYING, onVideoStartedPlaying,false,0,true);
+			}
+			
+			private function onVideoPlayerReady(e:VideoPlayerEvent):void
+			{
+				_videoPlayerReady=true;
+				VideoPlayer.stopVideo();
+			}
+			
+			private function onVideoStartedPlaying(e:VideoPlayerEvent):void
+			{
+				_exerciseStartedPlaying=true;
+				if (DataModel.getInstance().isLoggedIn && _cueManagerReady && _rolesReady && _localesReady && _exerciseStartedPlaying)
+				{
+					_exerciseStartedPlaying=false;
+					var subtitlesAreUsed:Boolean=VideoPlayer.subtitlePanelVisible;
+					var subtitleId:int=_cueManager.currentSubtitle;
+					var videoData:UserVideoHistoryVO=new UserVideoHistoryVO(0, 0, _exerciseId, false, 0, '', subtitlesAreUsed, subtitleId, 0);
+					if (_exerciseId > 0 && subtitleId > 0)
+						trace("bideoIkusten");
+						//new UserVideoHistoryEvent(UserVideoHistoryEvent.STAT_EXERCISE_WATCH, videoData).dispatch();
+				}
+			}
+			
+			private function onSubtitlesRetrieved(e:CueManagerEvent):void
+			{
+				setupRecordingCommands();
+			}
+						
+			private function setupPlayCommands():void
+			{
+				var auxList:ArrayCollection=_cueManager.getCuelist();
+				if (auxList.length <= 0)
+					return;
+				prepareRoles(auxList);
+				for each (var cueobj:CueObject in auxList)
+				{
+					cueobj.setStartCommand(new ShowHideSubtitleCommand(cueobj, VideoPlayer));
+					cueobj.setEndCommand(new ShowHideSubtitleCommand(null, VideoPlayer));
+				}
+				_cueManagerReady=true;
+				
+			}
+			
+			private function prepareRoles(subtitleLines:ArrayCollection):void
+			{
+				_characterNames.removeAll();
+				_roles.removeAll();
+				if (subtitleLines.length <= 0)
+				{
+					//availableRoles.enabled=false;
+					_rolesReady=false;
+				}
+				else
+				{
+					var tmpRoles:ArrayCollection=new ArrayCollection();
+					for each (var cueobj:CueObject in subtitleLines)
+					{
+						if (cueobj.role != "NPC" && !tmpRoles.contains(cueobj.role))
+						{
+							tmpRoles.addItem(cueobj.role);
+							_roles.addItem(new ExerciseRoleVO(cueobj.roleId, _exerciseId, cueobj.role));
+						}
+					}
+					
+					var sort:Sort=new Sort();
+					var sortfield:SortField=new SortField(null, false);
+					sort.fields=[sortfield];
+					addStyleClient(sortfield);
+					tmpRoles.sort=sort;
+					tmpRoles.refresh();
+					
+					_characterNames.addAll(tmpRoles);
+					_characterNames.refresh();
+					//availableRoles.enabled=true;
+					_rolesReady=true;
+					/*if (_characterNames.length == 2)
+					{
+						role1.label=_characterNames[0];
+						role2.label=_characterNames[1];
+					}
+					else
+					{
+						role1.label=_characterNames[0];
+						role2.visible=false;
+					}*/
+				}
+			}
+			
+			protected function view2_viewDeactivateHandler(event:ViewNavigatorEvent):void
+			{
+				trace("viewDeactivate");
+				
+			}
+			
+			protected function view2_removingHandler(event:ViewNavigatorEvent):void
+			{
+				//Clear all the active references to the videoplayer and cuemanager object 
+				//so that it can actually be unferenced and collected by the internal garbage collector.
+				//Since these objects are going to be constructed/destructed many times the use of "weak reference" 
+				//in the event listeners is also suggested, so that there is no obstacles for the gc.
+				VideoPlayer.endVideo(); // Stop video
+				VideoPlayer.removeEventListener(StreamEvent.ENTER_FRAME, _cueManager.monitorCuePoints);
+				_cueManager.removeEventListener(CueManagerEvent.SUBTITLES_RETRIEVED, onSubtitlesRetrieved);
+				VideoPlayer=null;
+				_cueManager=null;
+			}
+			
+			protected function view2_removeHandler(event:FlexEvent):void
+			{
+				trace("remove");
+			}
+			
+			protected function view2_initializeHandler(event:FlexEvent):void
+			{
+				//view set to landscape
+				stage.setAspectRatio(StageAspectRatio.LANDSCAPE); 
+				
+				// TODO Auto-generated method stub
+				
+			}
+			
+			private function userCanAssess():void{
+				var knowsLanguage:Boolean = false;
+				var tmpUser:UserVO = model.DataModel.getInstance().loggedUser;
+				for (var i:int=0; i<tmpUser.userLanguages.length; i++){
+					if (tmpUser.userLanguages[i].language == _currentEvaluation.exerciseLanguage){
+						knowsLanguage = true;
+						if (knowsLanguage && (tmpUser.userLanguages[i].level >= _currentEvaluation.exerciseAvgDifficulty)){
+							_canAssess = true;
+						}
+						break;
+					}
+				} 
+				_assessCheck = true;
+			}
+			
+			private function setValue(e:Event,value:int):void{
+				switch(value){
+					case 1:
+						puntButton1.label=e.currentTarget.selectedItem;
+						puntButton1.closeDropDown();
+						break;
+					case 2:
+						puntButton2.label=e.currentTarget.selectedItem;
+						puntButton2.closeDropDown();
+						break;
+					case 3:
+						puntButton3.label=e.currentTarget.selectedItem;
+						puntButton3.closeDropDown();
+						break;
+					case 4:
+						puntButton4.label=e.currentTarget.selectedItem;
+						puntButton4.closeDropDown();
+						break;
+					case 5:
+						puntButton5.label=e.currentTarget.selectedItem;
+						puntButton5.closeDropDown();
+						break;
+				}
+			}
+			
+			private function prepareEvaluation():void{
+				if (!_assessCheck){
+					userCanAssess();
+				}
+				
+				if (_canAssess){
+					validateEvaluation();
+					if (_validEvaluation){
+						evalButton.enabled = false;
+						evalButton.label = resourceManager.getString('myResources','LABEL_SENDING');
+						new EvaluationEvent(EvaluationEvent.ADD_ASSESSMENT,createEvaluation()).dispatch();
+					}
+					else {
+						//Invalid evaluation alert dialog throw
+						new invalidEvalAlert().open(this,true);
+					}
+				} else {
+					evalButton.enabled = false;
+					new langLevelAlert().open(this,true);
+				}
+			}
+			
+			private function validateEvaluation():void{
+				if (punt1.selectedItem != null && 
+					punt2.selectedItem != null &&
+					punt3.selectedItem != null &&
+					punt4.selectedItem != null &&
+					punt5.selectedItem != null){
+					_validEvaluation = true;
+					if (checkTestua.selected == true && (testuIruzkina.text == null || testuIruzkina.text == "")){
+						_validEvaluation = false;
+					}
+				}
+					
+			}
+			
+			private function createEvaluation():EvaluationVO{
+				var newEval:EvaluationVO = new EvaluationVO;
+				newEval.responseId = _currentEvaluation.responseId;
+				newEval.intonationScore = (uint)(punt1.selectedItem);
+				newEval.fluencyScore = (uint)(punt2.selectedItem);
+				newEval.rhythmScore = (uint)(punt3.selectedItem);
+				newEval.spontaneityScore = (uint)(punt4.selectedItem);
+				newEval.overallScore = (uint)(punt5.selectedItem);
+				if (checkTestua.selected = true){
+					newEval.comment = testuIruzkina.text;
+				} else {
+				newEval.comment = "";
+				}
+				return newEval;
+			}
+			
+			private function resetEvaluation():void{
+				testuIruzkina.text="";
+				testuIruzkina.visible=false;
+				checkTestua.selected=false;
+				punt1.selectedItem=null;
+				puntButton1.label=resourceManager.getString('myResources','LABEL_CLICK_HERE');
+				punt2.selectedItem=null;
+				puntButton2.label=resourceManager.getString('myResources','LABEL_CLICK_HERE');
+				punt3.selectedItem=null;
+				puntButton3.label=resourceManager.getString('myResources','LABEL_CLICK_HERE');
+				punt4.selectedItem=null;
+				puntButton4.label=resourceManager.getString('myResources','LABEL_CLICK_HERE');
+				punt5.selectedItem=null;
+				puntButton5.label=resourceManager.getString('myResources','LABEL_CLICK_HERE');
+			}
+			
+			private function activateComment():void{
+				if (testuIruzkina.visible==true){
+					testuIruzkina.visible=false;
+				} else {
+					testuIruzkina.visible=true;
+				}
+			}
+			
+			protected function set addAssessmentRetrievedHandler(value:Boolean):void{
+				new evalAddedAlert().open(this,true);
+				evalButton.label = resourceManager.getString('myResources','LABEL_DONE');
+			}	
 		]]>
 	</fx:Script>
 	
-	<fx:Binding source="{DataModel.getInstance().waitingForAssessmentDataRetrieved}"
-				destination="waitingAssessmentRetrievedHandler"/>
-	<fx:Binding source="{DataModel.getInstance().responeListEmpty}" 
-				destination="ShowUser"/>
+	<!-- <fx:Binding/>
+	-->
+	
+	<fx:Binding source="{DataModel.getInstance().availableExerciseLocalesRetrieved}"
+				destination="this.onLocalesRetrieved"/>
+	<fx:Binding source="{DataModel.getInstance().addAssessmentRetrieved}"
+				destination="addAssessmentRetrievedHandler"/>
+	
+	
 	
 	<fx:Declarations>
-		<fx:Component className="AlertMsg">
+		<fx:Component className="langLevelAlert">
 			<s:SkinnablePopUpContainer x="70" y="300">
 				<s:TitleWindow title="Babelium Message" close="close()">
 					<s:VGroup horizontalAlign="center" verticalAlign="middle" paddingTop="8" paddingBottom="8" paddingLeft="8" paddingRight="8" gap="5" width="100%">
-						<s:Label text="There are not Responses Available"/>
+						<s:Label text="{resourceManager.getString('myResources','ERROR_INSUFICCIENT_LEVEL')}"/>
+						<s:Button label="OK" click="close()" height="40" width="60"/>
+					</s:VGroup>
+				</s:TitleWindow>
+			</s:SkinnablePopUpContainer>
+		</fx:Component>
+		
+		<fx:Component className="evalAddedAlert">
+			<s:SkinnablePopUpContainer x="70" y="300">
+				<s:TitleWindow title="Babelium Message" close="close()">
+					<s:VGroup horizontalAlign="center" verticalAlign="middle" paddingTop="8" paddingBottom="8" paddingLeft="8" paddingRight="8" gap="5" width="100%">
+						<s:Label text="{resourceManager.getString('myResources','YOUR_ASSESSMENT_HAS_BEEN_SAVED')}"/>
+						<s:Button label="OK" click="close()" height="40" width="60"/>
+					</s:VGroup>
+				</s:TitleWindow>
+			</s:SkinnablePopUpContainer>
+		</fx:Component>
+		
+		<fx:Component className="invalidEvalAlert">
+			<s:SkinnablePopUpContainer x="70" y="300">
+				<s:TitleWindow title="Babelium Message" close="close()">
+					<s:VGroup horizontalAlign="center" verticalAlign="middle" paddingTop="8" paddingBottom="8" paddingLeft="8" paddingRight="8" gap="5" width="100%">
+						<s:Label text="{resourceManager.getString('myResources','YOUR_ASSESSMENT_IS_INCOMPLETE')}"/>
 						<s:Button label="OK" click="close()" height="40" width="60"/>
 					</s:VGroup>
 				</s:TitleWindow>
@@ -62,36 +521,129 @@
 		</fx:Component>
 	</fx:Declarations>
 	
-	<s:VGroup width="100%"
-			  height="100%">
-		
-		<utils:search width="100%"/>
-		<s:VGroup horizontalAlign="center"
-				  width="100%"
-				  paddingTop="16"
-				  paddingBottom="16">
-			<s:Label text="List of assessment pending responses"
-					 styleName="sectionTitleLabel"
-					 id="userProfileTitleLabel"/>
-			<s:Line width="{userProfileTitleLabel.width}">
-				<s:stroke>
-					<s:SolidColorStroke weight="3"
-										color="{userProfileTitleLabel.getStyle('color')}"/>
-				</s:stroke>
-			</s:Line>
+	<s:VGroup id="mainScreen" x="0" y="0" width="100%" height="100%" horizontalAlign="contentJustify"
+			  verticalAlign="top">
+		<utils:search id="searchScreen"/>
+		<s:HGroup id="videoEvalScreen" height="70%">
+			
+		<s:HGroup id="videoScreen" width="55%" height="100%" minWidth="0" minHeight="0"
+				  horizontalAlign="left" paddingLeft="16" paddingTop="6">
+			
+			<videoPlayer1:VideoPlayerBabelia id="VideoPlayer"
+											 skin="white"
+											 seek="true"
+											 subtitles="true"
+											 autoPlay="false"
+											 autoScale="true"
+											 width="{this.width/2}"
+											 height="{this.height/1.8}"
+											 streamSource="{DataModel.getInstance().streamingResourcesPath}"
+											 controlsEnabled="true"/>
+			<!-- <s:HGroup id="recording_options" width="100%" minWidth="0" minHeight="0"
+					  paddingLeft="16" verticalAlign="top">
+			</s:HGroup> -->
+		</s:HGroup>
+		<s:VGroup id="evalScreen" width="45%" height="100%" horizontalAlign="center"
+				  verticalAlign="top">
+			
+				<s:Label id="selectedVideoName" width="100%" styleName="sectionTitleLabel" text="{_exerciseTitle}" textAlign="center" textJustify="interWord"/>
+			
+			<s:HGroup width="100%" height="12%" horizontalAlign="center" verticalAlign="middle">
+				<s:HGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+				<s:Label top="11" height="100%" text="{resourceManager.getString('myResources','LABEL_INTONATION_SCORE')}" verticalAlign="middle"/>
+				</s:HGroup>
+				<s:HGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+					<s:CalloutButton id="puntButton1" height="80%" label="{resourceManager.getString('myResources','LABEL_CLICK_HERE')}"
+									 calloutDestructionPolicy="never" fontSize="12">
+						<s:calloutContent>
+							<s:VGroup paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" horizontalAlign="center">
+								<s:List id="punt1" change="setValue(event, 1)" dataProvider="{model.DataModel.getInstance().scoresArrayCollection}"/>
+							</s:VGroup>
+						</s:calloutContent>	
+					</s:CalloutButton>
+				</s:HGroup>
+				</s:HGroup>
+				<s:HGroup width="100%" height="12%" horizontalAlign="center" verticalAlign="middle">
+					<s:HGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+					<s:Label height="100%" text="{resourceManager.getString('myResources','LABEL_FLUENCY_SCORE')}" verticalAlign="middle"/>
+					</s:HGroup>
+					<s:HGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+					<s:CalloutButton id="puntButton2" height="80%" label="{resourceManager.getString('myResources','LABEL_CLICK_HERE')}"
+									 calloutDestructionPolicy="never" fontSize="12">
+						<s:calloutContent>
+							<s:VGroup paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" horizontalAlign="center">
+								<s:List id="punt2" change="setValue(event, 2)" dataProvider="{model.DataModel.getInstance().scoresArrayCollection}"/>
+							</s:VGroup>
+						</s:calloutContent>	
+					</s:CalloutButton>
+					</s:HGroup>
+				</s:HGroup>
+				<s:HGroup width="100%" height="12%" horizontalAlign="center" verticalAlign="middle">
+					<s:HGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+					<s:Label height="100%" text="{resourceManager.getString('myResources','LABEL_RHYTHM_SCORE')}" verticalAlign="middle"/>
+					</s:HGroup>
+					<s:HGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+					<s:CalloutButton id="puntButton3" height="80%" label="{resourceManager.getString('myResources','LABEL_CLICK_HERE')}"
+									 calloutDestructionPolicy="never" fontSize="12">
+						<s:calloutContent>
+							<s:VGroup paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" horizontalAlign="center">
+								<s:List id="punt3" change="setValue(event, 3)" dataProvider="{model.DataModel.getInstance().scoresArrayCollection}"/>
+							</s:VGroup>
+						</s:calloutContent>	
+					</s:CalloutButton>
+					</s:HGroup>
+				</s:HGroup>
+				<s:HGroup width="100%" height="12%" horizontalAlign="center" verticalAlign="middle">
+					<s:HGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+					<s:Label height="100%" text="{resourceManager.getString('myResources','LABEL_SPONTANEITY_SCORE')}" textAlign="center"
+							 verticalAlign="middle"/>
+					</s:HGroup>
+					<s:HGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+					<s:CalloutButton id="puntButton4" height="80%" label="{resourceManager.getString('myResources','LABEL_CLICK_HERE')}"
+									 calloutDestructionPolicy="never" fontSize="12">
+						<s:calloutContent>
+							<s:VGroup paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" horizontalAlign="center">
+								<s:List id="punt4" change="setValue(event, 4)" dataProvider="{model.DataModel.getInstance().scoresArrayCollection}"/>
+							</s:VGroup>
+						</s:calloutContent>	
+					</s:CalloutButton>
+					</s:HGroup>
+				</s:HGroup>
+				<s:HGroup width="100%" height="12%" horizontalAlign="center" verticalAlign="middle">
+					<s:HGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+					<s:Label height="100%" text="{resourceManager.getString('myResources','LABEL_OVERALL_SCORE')}" verticalAlign="middle"/>
+					</s:HGroup>
+					<s:HGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+					<s:CalloutButton id="puntButton5" height="80%" label="{resourceManager.getString('myResources','LABEL_CLICK_HERE')}"
+									 calloutDestructionPolicy="never" fontSize="12">
+						<s:calloutContent>
+							<s:VGroup paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" horizontalAlign="center">
+								<s:List id="punt5" change="setValue(event, 5)" dataProvider="{model.DataModel.getInstance().scoresArrayCollection}"/>
+							</s:VGroup>
+						</s:calloutContent>	
+					</s:CalloutButton>
+					</s:HGroup>
+				</s:HGroup>
+				<s:HGroup id="buttonScreen" width="100%" height="20%" horizontalAlign="center" verticalAlign="middle">
+					<s:VGroup id="asd" width="50%" height="100%" horizontalAlign="center"
+							  verticalAlign="bottom">
+						<s:Button id="evalButton" label="{resourceManager.getString('myResources','LABEL_SEND_EVALUATION')}" click="prepareEvaluation()"
+								  fontSize="18"/>	
+					</s:VGroup>
+					<s:HGroup width="50%" height="100%" horizontalAlign="center" verticalAlign="bottom">
+						<s:Button id='resetButton' label="{resourceManager.getString('myResources','DELETE')}" click="resetEvaluation()" fontSize="16"/>	
+					</s:HGroup>
+				</s:HGroup>
 		</s:VGroup>
-		<s:List id="latestUploadedVideosDataGroup"
-				pageScrollingEnabled="true"
-				width="100%"
-				height="100%"
-				itemRenderer="modules.evaluation.ListItemWaitingForAssessment"
-				skinClass="skins.TransparentBgListSkin"
-				dataProvider="{waitingForAssessmentList}">
-			<s:layout>
-				<s:VerticalLayout/>
-			</s:layout>
-		</s:List>
-		
+		</s:HGroup>
+		<s:HGroup id="textScreen" height="20%" horizontalAlign="left" verticalAlign="middle">
+			<s:HGroup width="30%" height="100%" horizontalAlign="center" verticalAlign="contentJustify">
+				<s:CheckBox id="checkTestua" label="{resourceManager.getString('myResources','LABEL_INCLUDE_TEXT_COMMENT')}" change="activateComment()"/>	
+			</s:HGroup>
+			<s:HGroup width="70%" height="100%" verticalAlign="middle">
+				<s:TextArea id="testuIruzkina" visible="false" width="100%" height="80%"/>	
+			</s:HGroup>
+		</s:HGroup>
 	</s:VGroup>
+					
 </s:View>
-
